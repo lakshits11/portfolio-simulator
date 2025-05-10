@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavEntry } from '../types/navData';
 import { fillMissingNavDates } from '../utils/fillMissingNavDates';
+import { TableWithChart } from './TableWithChart';
 
 interface NavTableProps {
   navData: NavEntry[];
@@ -11,31 +12,20 @@ function formatDate(date: Date): string {
 }
 
 export const NavTable: React.FC<NavTableProps> = ({ navData }) => {
-  const filledData = fillMissingNavDates(navData);
-  const displayData = [...filledData].reverse();
-  if (!displayData.length) return null;
+  if (!navData.length) return null;
   return (
-    <div style={{ maxWidth: '100%', marginTop: 24 }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
-        <thead>
-          <tr>
-            <th style={{ borderBottom: '1px solid #ccc', textAlign: 'left', padding: 8, background: '#fafafa', position: 'sticky', top: 0, zIndex: 1 }}>Date</th>
-            <th style={{ borderBottom: '1px solid #ccc', textAlign: 'left', padding: 8, background: '#fafafa', position: 'sticky', top: 0, zIndex: 1 }}>NAV</th>
-          </tr>
-        </thead>
-      </table>
-      <div style={{ maxHeight: 350, overflowY: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
-          <tbody>
-            {displayData.map((entry, idx) => (
-              <tr key={idx}>
-                <td style={{ padding: 8 }}>{formatDate(entry.date)}</td>
-                <td style={{ padding: 8 }}>{entry.nav.toFixed(5)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <TableWithChart
+      columns={[
+        { label: 'Date', render: (row) => formatDate(row.date) },
+        { label: 'NAV', render: (row) => row.nav.toFixed(5) },
+      ]}
+      data={fillMissingNavDates(navData)}
+      chartTitle="NAV Over Time"
+      chartSeriesName="NAV"
+      chartColor="#007bff"
+      yAxisTitle="NAV"
+      getChartX={row => formatDate(row.date)}
+      getChartY={row => row.nav}
+    />
   );
 }; 
