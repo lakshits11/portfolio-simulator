@@ -5,6 +5,8 @@ import { LoadingSpinner } from './components/LoadingSpinner';
 import { NavTable } from './components/NavTable';
 import { useMutualFunds } from './hooks/useMutualFunds';
 import { useNavData } from './hooks/useNavData';
+import { calculateRollingXirr } from './utils/rollingXirr';
+import { RollingXirrTable } from './components/RollingXirrTable';
 
 const App: React.FC = () => {
   const { funds, loading, error } = useMutualFunds();
@@ -15,6 +17,10 @@ const App: React.FC = () => {
     setSelectedScheme(schemeCode);
     loadNavData(schemeCode);
   };
+
+  const rollingXirr = (!navLoading && !navError && navData.length > 0)
+    ? calculateRollingXirr(navData)
+    : [];
 
   return (
     <Container>
@@ -30,7 +36,10 @@ const App: React.FC = () => {
       {selectedScheme && navLoading && <LoadingSpinner />}
       {selectedScheme && navError && <div style={{ color: 'red' }}>{navError}</div>}
       {selectedScheme && !navLoading && !navError && navData.length > 0 && (
-        <NavTable navData={navData} />
+        <>
+          <NavTable navData={navData} />
+          <RollingXirrTable data={rollingXirr} />
+        </>
       )}
     </Container>
   );

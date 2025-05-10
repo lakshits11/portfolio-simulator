@@ -104,9 +104,11 @@ describe('App', () => {
     render(<App />);
     // Simulate fund selection
     fireEvent.change(screen.getByRole('combobox'), { target: { value: 123 } });
-    const table = screen.getByRole('table');
-    expect(table).toBeInTheDocument();
-    const tableUtils = within(table);
+    const tables = screen.getAllByRole('table');
+    // The first table is the NAV table header, the second is the NAV table body
+    // We'll check the second table for NAV data
+    const navTable = tables[1];
+    const tableUtils = within(navTable);
     expect(tableUtils.getByText('2025-05-09')).toBeInTheDocument();
     expect(tableUtils.getByText('166.29450')).toBeInTheDocument();
     expect(tableUtils.getByText('2025-05-08')).toBeInTheDocument();
