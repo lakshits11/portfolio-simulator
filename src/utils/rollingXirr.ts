@@ -4,12 +4,14 @@ import { NavEntry } from '../types/navData';
 export interface RollingXirrEntry {
   date: Date;
   xirr: number;
+  transactions: { amount: number; when: Date }[];
 }
 
 /**
  * Calculates rolling 1-year XIRR for a series of NAV entries.
  * For each date, finds the closest available NAV at least one year before,
  * and calculates XIRR for that period. Skips dates where no such NAV exists.
+ * Also stores the transactions used for each calculation.
  */
 export function calculateRollingXirr(navData: NavEntry[]): RollingXirrEntry[] {
   if (navData.length < 2) return [];
@@ -37,7 +39,7 @@ export function calculateRollingXirr(navData: NavEntry[]): RollingXirrEntry[] {
     ];
     try {
       const rate = xirr(transactions);
-      result.push({ date: current.date, xirr: rate });
+      result.push({ date: current.date, xirr: rate, transactions });
     } catch {
       // If xirr fails to converge, skip
       continue;
