@@ -1,44 +1,36 @@
-import React, { useEffect, useState } from 'react';
-import { MutualFund } from './types/mutualFund';
-import { fetchMutualFunds } from './services/mutualFundService';
+import React from 'react';
 import { MutualFundDropdown } from './components/MutualFundDropdown';
+import { Container } from './components/Container';
+import { LoadingSpinner } from './components/LoadingSpinner';
+import { useMutualFunds } from './hooks/useMutualFunds';
 
 const App: React.FC = () => {
-  const [funds, setFunds] = useState<MutualFund[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const loadFunds = async () => {
-      try {
-        const data = await fetchMutualFunds();
-        setFunds(data);
-      } catch (error) {
-        console.error('Error fetching mutual funds:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadFunds();
-  }, []);
+  const { funds, loading, error } = useMutualFunds();
 
   const handleFundSelect = (schemeCode: number) => {
     console.log('Selected fund:', schemeCode);
-    // Add your selection handling logic here
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <LoadingSpinner />;
+  }
+
+  if (error) {
+    return (
+      <Container>
+        <div style={{ color: 'red' }}>{error}</div>
+      </Container>
+    );
   }
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h2>Mutual Funds</h2>
+    <Container>
+      <h2 style={{ marginBottom: '20px' }}>Mutual Funds</h2>
       <MutualFundDropdown 
         funds={funds} 
         onSelect={handleFundSelect}
       />
-    </div>
+    </Container>
   );
 };
 
