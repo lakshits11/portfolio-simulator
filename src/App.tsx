@@ -37,6 +37,8 @@ const App: React.FC = () => {
     setLumpSumRollingXirr([]);
     setSipRollingXirr([]);
     setXirrError(null);
+    setFilledNavData([]);
+    loadNavData(schemeCode);
   };
 
   const handleYearsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,6 +47,7 @@ const App: React.FC = () => {
     setLumpSumRollingXirr([]);
     setSipRollingXirr([]);
     setXirrError(null);
+    setFilledNavData([]);
   };
 
   const handlePlot = () => {
@@ -92,7 +95,7 @@ const App: React.FC = () => {
           Plot
         </button>
       </div>
-      {loading && <LoadingSpinner />}
+      {loading && <LoadingSpinner text="Loading list of mutual funds..." />}
       {error && <div style={{ color: 'red' }}>{error}</div>}
       {!loading && !error && funds.length > 0 && (
         <MutualFundDropdown 
@@ -101,11 +104,11 @@ const App: React.FC = () => {
           value={selectedScheme}
         />
       )}
-      {selectedScheme && navLoading && <LoadingSpinner />}
+      {selectedScheme && navLoading && <LoadingSpinner text="Loading NAV data..." />}
       {selectedScheme && navError && <div style={{ color: 'red' }}>{navError}</div>}
-      {selectedScheme && !navLoading && !navError && navData.length > 0 && (
-        rollingLoading ? <LoadingSpinner /> : (
-          hasPlotted && <>
+      {(hasPlotted || rollingLoading) && selectedScheme && !navLoading && !navError && navData.length > 0 && (
+        rollingLoading ? <LoadingSpinner text="Calculating XIRR..." /> : (
+          <>
             <NavTable navData={filledNavData} />
             <RollingXirrTable data={lumpSumRollingXirr} />
             <SipRollingXirrTable data={sipRollingXirr} />
