@@ -1,14 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { MutualFundDropdown } from './components/MutualFundDropdown';
 import { Container } from './components/Container';
 import { LoadingSpinner } from './components/LoadingSpinner';
+import { NavTable } from './components/NavTable';
 import { useMutualFunds } from './hooks/useMutualFunds';
+import { useNavData } from './hooks/useNavData';
 
 const App: React.FC = () => {
   const { funds, loading, error, loadFunds } = useMutualFunds();
+  const { navData, loading: navLoading, error: navError, loadNavData } = useNavData();
+  const [selectedScheme, setSelectedScheme] = useState<number | null>(null);
 
   const handleFundSelect = (schemeCode: number) => {
-    console.log('Selected fund:', schemeCode);
+    setSelectedScheme(schemeCode);
+    loadNavData(schemeCode);
   };
 
   const handleLoadClick = async () => {
@@ -28,6 +33,11 @@ const App: React.FC = () => {
           funds={funds} 
           onSelect={handleFundSelect}
         />
+      )}
+      {selectedScheme && navLoading && <LoadingSpinner />}
+      {selectedScheme && navError && <div style={{ color: 'red' }}>{navError}</div>}
+      {selectedScheme && !navLoading && !navError && navData.length > 0 && (
+        <NavTable navData={navData} />
       )}
     </Container>
   );
