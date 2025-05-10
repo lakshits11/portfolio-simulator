@@ -17,13 +17,13 @@ describe('calculateLumpSumRollingXirr', () => {
     expect(r2024).toBeDefined();
     expect(r2024!.xirr).toBeCloseTo(0.2, 3);
     expect(r2024!.transactions.length).toBe(2);
-    expect(r2024!.transactions[0]).toEqual({ amount: -100, when: new Date('2023-01-31') });
-    expect(r2024!.transactions[1]).toEqual({ amount: 120, when: new Date('2024-01-31') });
+    expect(r2024!.transactions[0]).toEqual({ nav: 100, when: new Date('2023-01-31') });
+    expect(r2024!.transactions[1]).toEqual({ nav: 120, when: new Date('2024-01-31') });
     expect(r2025).toBeDefined();
     expect(r2025!.xirr).toBeCloseTo(0.1662, 3);
     expect(r2025!.transactions.length).toBe(2);
-    expect(r2025!.transactions[0]).toEqual({ amount: -120, when: new Date('2024-01-31') });
-    expect(r2025!.transactions[1]).toEqual({ amount: 140, when: new Date('2025-01-31') });
+    expect(r2025!.transactions[0]).toEqual({ nav: 120, when: new Date('2024-01-31') });
+    expect(r2025!.transactions[1]).toEqual({ nav: 140, when: new Date('2025-01-31') });
   });
 
   it('returns empty array if not enough data', () => {

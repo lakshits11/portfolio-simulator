@@ -22,8 +22,8 @@ describe('calculateSipRollingXirr', () => {
     const last = result[result.length - 1];
     expect(last).toBeDefined();
     expect(last.transactions.length).toBe(13); // 12 SIPs + 1 sell
-    expect(last.transactions[0].amount).toBe(-100);
-    expect(last.transactions[12].amount).toBeGreaterThan(0); // sell
+    expect(last.transactions[0].nav).toBe(100);
+    expect(last.transactions[12].nav).toBe(160); // sell
     expect(typeof last.xirr).toBe('number');
   });
 }); 
