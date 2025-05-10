@@ -14,18 +14,54 @@ import { SipRollingXirrTable } from './components/SipRollingXirrTable';
 
 const DEFAULT_SCHEME_CODE = 120716;
 
+function getQueryParams() {
+  const params = new URLSearchParams(window.location.search);
+  const scheme = params.get('scheme');
+  const years = params.get('years');
+  return {
+    scheme: scheme ? Number(scheme) : null,
+    years: years ? Number(years) : null,
+  };
+}
+
+function setQueryParams(scheme: number, years: number) {
+  const params = new URLSearchParams(window.location.search);
+  params.set('scheme', String(scheme));
+  params.set('years', String(years));
+  window.history.replaceState({}, '', `?${params.toString()}`);
+}
+
 const App: React.FC = () => {
   const { funds, loading, error } = useMutualFunds();
   const { navData, loading: navLoading, error: navError, loadNavData } = useNavData();
-  const [selectedScheme, setSelectedScheme] = useState<number>(DEFAULT_SCHEME_CODE);
+
+  // Initialize from query string
+  const initialParams = getQueryParams();
+  const [selectedScheme, setSelectedScheme] = useState<number>(
+    initialParams.scheme || DEFAULT_SCHEME_CODE
+  );
+  const [years, setYears] = useState<number>(initialParams.years || 1);
   const [xirrError, setXirrError] = useState<string | null>(null);
   const [lumpSumRollingXirr, setLumpSumRollingXirr] = useState<RollingXirrEntry[]>([]);
   const [sipRollingXirr, setSipRollingXirr] = useState<SipRollingXirrEntry[]>([]);
   const [filledNavData, setFilledNavData] = useState<NavEntry[]>([]);
-  const [years, setYears] = useState<number>(1);
   const [rollingLoading, setRollingLoading] = useState<boolean>(false);
   const [hasPlotted, setHasPlotted] = useState<boolean>(false);
   const [navRequested, setNavRequested] = useState<boolean>(false);
+
+  // Sync state to query string
+  useEffect(() => {
+    setQueryParams(selectedScheme, years);
+  }, [selectedScheme, years]);
+
+  // Auto-trigger plot if params are present in URL
+  useEffect(() => {
+    if (initialParams.scheme && initialParams.years) {
+      setNavRequested(true);
+      loadNavData(initialParams.scheme);
+    }
+    // eslint-disable-next-line
+  }, []);
 
   const handleFundSelect = (schemeCode: number) => {
     setSelectedScheme(schemeCode);
