@@ -15,21 +15,27 @@ export const NavTable: React.FC<NavTableProps> = ({ navData }) => {
   const displayData = [...filledData].reverse();
   if (!displayData.length) return null;
   return (
-    <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 24 }}>
-      <thead>
-        <tr>
-          <th style={{ borderBottom: '1px solid #ccc', textAlign: 'left', padding: 8 }}>Date</th>
-          <th style={{ borderBottom: '1px solid #ccc', textAlign: 'left', padding: 8 }}>NAV</th>
-        </tr>
-      </thead>
-      <tbody>
-        {displayData.map((entry, idx) => (
-          <tr key={idx}>
-            <td style={{ padding: 8 }}>{formatDate(entry.date)}</td>
-            <td style={{ padding: 8 }}>{entry.nav.toFixed(5)}</td>
+    <div style={{ maxWidth: '100%', marginTop: 24 }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+        <thead>
+          <tr>
+            <th style={{ borderBottom: '1px solid #ccc', textAlign: 'left', padding: 8, background: '#fafafa', position: 'sticky', top: 0, zIndex: 1 }}>Date</th>
+            <th style={{ borderBottom: '1px solid #ccc', textAlign: 'left', padding: 8, background: '#fafafa', position: 'sticky', top: 0, zIndex: 1 }}>NAV</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+      </table>
+      <div style={{ maxHeight: 350, overflowY: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+          <tbody>
+            {displayData.map((entry, idx) => (
+              <tr key={idx}>
+                <td style={{ padding: 8 }}>{formatDate(entry.date)}</td>
+                <td style={{ padding: 8 }}>{entry.nav.toFixed(5)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }; 
