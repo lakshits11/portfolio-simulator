@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { MutualFund } from '../types/mutualFund';
-import { fetchMutualFunds } from '../services/mutualFundService';
+import { mfapiMutualFund } from '../types/mfapiMutualFund';
+import { fetchMutualFunds } from '../services/mfapiFundNamesService';
 
 export const useMutualFunds = () => {
-  const [funds, setFunds] = useState<MutualFund[]>([]);
+  const [funds, setFunds] = useState<mfapiMutualFund[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

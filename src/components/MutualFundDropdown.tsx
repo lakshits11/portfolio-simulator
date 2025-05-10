@@ -1,8 +1,8 @@
 import React from 'react';
-import { MutualFund } from '../types/mutualFund';
+import { mfapiMutualFund } from '../types/mfapiMutualFund';
 
 interface MutualFundDropdownProps {
-  funds: MutualFund[];
+  funds: mfapiMutualFund[];
   onSelect: (schemeCode: number) => void;
   value?: number | null;
 }

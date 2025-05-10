@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { useNavData } from './useNavData';
-import * as navService from '../services/navService';
+import * as mfapiNavService from '../services/mfapiNavService';
 
 describe('useNavData', () => {
   const mockNavData = [
@@ -13,13 +13,13 @@ describe('useNavData', () => {
   });
 
   it('does not fetch on mount', () => {
-    const fetchSpy = jest.spyOn(navService, 'fetchNavData');
+    const fetchSpy = jest.spyOn(mfapiNavService, 'fetchNavData');
     renderHook(() => useNavData());
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
   it('fetches and sets navData when loadNavData is called', async () => {
-    jest.spyOn(navService, 'fetchNavData').mockResolvedValueOnce(mockNavData);
+    jest.spyOn(mfapiNavService, 'fetchNavData').mockResolvedValueOnce(mockNavData);
     const { result } = renderHook(() => useNavData());
     await act(async () => {
       await result.current.loadNavData(120716);
@@ -32,7 +32,7 @@ describe('useNavData', () => {
   });
 
   it('handles error when fetchNavData fails', async () => {
-    jest.spyOn(navService, 'fetchNavData').mockRejectedValueOnce(new Error('fail'));
+    jest.spyOn(mfapiNavService, 'fetchNavData').mockRejectedValueOnce(new Error('fail'));
     const { result } = renderHook(() => useNavData());
     await act(async () => {
       await result.current.loadNavData(120716);

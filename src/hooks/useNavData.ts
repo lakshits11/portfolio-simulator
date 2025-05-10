@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { NavEntry } from '../types/navData';
-import { fetchNavData } from '../services/navService';
+import { fetchNavData } from '../services/mfapiNavService';
 
 export const useNavData = () => {
   const [navData, setNavData] = useState<NavEntry[]>([]);

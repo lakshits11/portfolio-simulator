@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MutualFundDropdown } from './MutualFundDropdown';
+// If you want to add type safety, you can import { mfapiMutualFund } from '../types/mfapiMutualFund';
 
 describe('MutualFundDropdown', () => {
   const mockFunds = [

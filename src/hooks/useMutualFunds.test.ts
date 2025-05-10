@@ -1,9 +1,9 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { useMutualFunds } from './useMutualFunds';
-import { fetchMutualFunds } from '../services/mutualFundService';
+import { fetchMutualFunds } from '../services/mfapiFundNamesService';
 
 // Mock the mutual fund service
-jest.mock('../services/mutualFundService', () => ({
+jest.mock('../services/mfapiFundNamesService', () => ({
   fetchMutualFunds: jest.fn()
 }));
 

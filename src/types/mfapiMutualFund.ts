@@ -1,4 +1,4 @@
-export interface MutualFund {
+export interface mfapiMutualFund {
   schemeCode: number;
   schemeName: string;
 } 
