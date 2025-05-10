@@ -13,10 +13,12 @@ export const useNavData = () => {
     try {
       const data = await fetchNavData(schemeCode);
       setNavData(data);
+      return data;
     } catch (err) {
       setError('Failed to fetch NAV data');
       setNavData([]);
       console.error('Error fetching NAV data:', err);
+      return [];
     } finally {
       setLoading(false);
     }

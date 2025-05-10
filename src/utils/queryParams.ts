@@ -4,14 +4,14 @@ export function getQueryParams() {
   const scheme = params.get('scheme');
   const years = params.get('years');
   return {
-    scheme: scheme ? Number(scheme) : null,
+    schemes: scheme ? scheme.split(',').map(Number).filter(n => !isNaN(n)) : [],
     years: years ? Number(years) : null,
   };
 }
 
-export function setQueryParams(scheme: number, years: number) {
+export function setQueryParams(schemes: number[], years: number) {
   const params = new URLSearchParams(window.location.search);
-  params.set('scheme', String(scheme));
+  params.set('scheme', schemes.join(','));
   params.set('years', String(years));
   window.history.replaceState({}, '', `?${params.toString()}`);
 } 
