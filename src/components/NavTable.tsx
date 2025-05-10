@@ -5,6 +5,10 @@ interface NavTableProps {
   navData: NavEntry[];
 }
 
+function formatDate(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
 export const NavTable: React.FC<NavTableProps> = ({ navData }) => {
   if (!navData.length) return null;
   return (
@@ -18,8 +22,8 @@ export const NavTable: React.FC<NavTableProps> = ({ navData }) => {
       <tbody>
         {navData.map((entry, idx) => (
           <tr key={idx}>
-            <td style={{ padding: 8 }}>{entry.date}</td>
-            <td style={{ padding: 8 }}>{entry.nav}</td>
+            <td style={{ padding: 8 }}>{formatDate(entry.date)}</td>
+            <td style={{ padding: 8 }}>{entry.nav.toFixed(5)}</td>
           </tr>
         ))}
       </tbody>

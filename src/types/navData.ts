@@ -1,4 +1,4 @@
 export interface NavEntry {
-  date: string;
-  nav: string;
+  date: Date;
+  nav: number;
 } 

@@ -4,8 +4,8 @@ import * as navService from '../services/navService';
 
 describe('useNavData', () => {
   const mockNavData = [
-    { date: '2025-05-09', nav: '166.29450' },
-    { date: '2025-05-08', nav: '168.13110' }
+    { date: new Date('2025-05-09'), nav: 166.2945 },
+    { date: new Date('2025-05-08'), nav: 168.1311 }
   ];
 
   beforeEach(() => {
@@ -27,6 +27,8 @@ describe('useNavData', () => {
     expect(result.current.navData).toEqual(mockNavData);
     expect(result.current.error).toBeNull();
     expect(result.current.loading).toBe(false);
+    expect(result.current.navData[0].date instanceof Date).toBe(true);
+    expect(typeof result.current.navData[0].nav).toBe('number');
   });
 
   it('handles error when fetchNavData fails', async () => {

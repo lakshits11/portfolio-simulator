@@ -5,8 +5,8 @@ import { NavEntry } from '../types/navData';
 
 describe('NavTable', () => {
   const navData: NavEntry[] = [
-    { date: '2025-05-09', nav: '166.29450' },
-    { date: '2025-05-08', nav: '168.13110' }
+    { date: new Date('2025-05-09'), nav: 166.2945 },
+    { date: new Date('2025-05-08'), nav: 168.1311 }
   ];
 
   it('renders table with correct data', () => {
