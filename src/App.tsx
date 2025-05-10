@@ -10,6 +10,7 @@ import { calculateSipRollingXirr } from './utils/sipRollingXirr';
 import { getQueryParams, setQueryParams } from './utils/queryParams';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+import { MultiFundCharts } from './components/MultiFundCharts';
 
 const DEFAULT_SCHEME_CODE = 120716;
 const COLORS = ['#007bff', '#28a745', '#ff9800', '#e91e63', '#9c27b0', '#00bcd4', '#795548', '#607d8b'];
@@ -193,66 +194,13 @@ const App: React.FC = () => {
       {xirrError && <div style={{ color: 'red', marginTop: 16 }}>{xirrError}</div>}
       {hasPlotted && Object.keys(navDatas).length > 0 && (
         <>
-          <div style={{ marginTop: 32 }}>
-            <HighchartsReact
-              highcharts={Highcharts}
-              options={{
-                title: { text: 'NAV Over Time' },
-                xAxis: {
-                  categories: getNavCategories(),
-                  title: { text: 'Date' },
-                  labels: { rotation: -45 }
-                },
-                yAxis: {
-                  title: { text: 'NAV' }
-                },
-                series: getNavSeries(),
-                chart: { height: 350 },
-                credits: { enabled: false },
-                legend: { enabled: true },
-              }}
-            />
-            <div style={{ marginTop: 24 }}>
-              <HighchartsReact
-                highcharts={Highcharts}
-                options={{
-                  title: { text: 'Lump Sum Rolling 1Y XIRR Over Time' },
-                  xAxis: {
-                    categories: getLumpSumCategories(),
-                    title: { text: 'Date' },
-                    labels: { rotation: -45 }
-                  },
-                  yAxis: {
-                    title: { text: 'XIRR (%)' }
-                  },
-                  series: getLumpSumSeries(),
-                  chart: { height: 350 },
-                  credits: { enabled: false },
-                  legend: { enabled: true },
-                }}
-              />
-            </div>
-            <div style={{ marginTop: 24 }}>
-              <HighchartsReact
-                highcharts={Highcharts}
-                options={{
-                  title: { text: 'SIP Rolling 1Y XIRR Over Time' },
-                  xAxis: {
-                    categories: getSipCategories(),
-                    title: { text: 'Date' },
-                    labels: { rotation: -45 }
-                  },
-                  yAxis: {
-                    title: { text: 'XIRR (%)' }
-                  },
-                  series: getSipSeries(),
-                  chart: { height: 350 },
-                  credits: { enabled: false },
-                  legend: { enabled: true },
-                }}
-              />
-            </div>
-          </div>
+          <MultiFundCharts
+            navDatas={navDatas}
+            lumpSumXirrDatas={lumpSumXirrDatas}
+            sipXirrDatas={sipXirrDatas}
+            funds={funds}
+            COLORS={COLORS}
+          />
         </>
       )}
     </Container>
