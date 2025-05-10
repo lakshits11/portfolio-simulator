@@ -5,7 +5,7 @@ import { LoadingSpinner } from './components/LoadingSpinner';
 import { NavTable } from './components/NavTable';
 import { useMutualFunds } from './hooks/useMutualFunds';
 import { useNavData } from './hooks/useNavData';
-import { calculateRollingXirr, RollingXirrEntry } from './utils/rollingXirr';
+import { calculateLumpSumRollingXirr, RollingXirrEntry } from './utils/lumpSumRollingXirr';
 import { RollingXirrTable } from './components/RollingXirrTable';
 import { fillMissingNavDates } from './utils/fillMissingNavDates';
 import { NavEntry } from './types/navData';
@@ -17,7 +17,7 @@ const App: React.FC = () => {
   const { navData, loading: navLoading, error: navError, loadNavData } = useNavData();
   const [selectedScheme, setSelectedScheme] = useState<number>(DEFAULT_SCHEME_CODE);
   const [xirrError, setXirrError] = useState<string | null>(null);
-  const [rollingXirr, setRollingXirr] = useState<RollingXirrEntry[]>([]);
+  const [lumpSumRollingXirr, setLumpSumRollingXirr] = useState<RollingXirrEntry[]>([]);
   const [filledNavData, setFilledNavData] = useState<NavEntry[]>([]);
 
   useEffect(() => {
@@ -30,15 +30,15 @@ const App: React.FC = () => {
       try {
         const filled = fillMissingNavDates(navData);
         setFilledNavData(filled);
-        const rolling = calculateRollingXirr(filled);
-        setRollingXirr(rolling);
+        const rolling = calculateLumpSumRollingXirr(filled);
+        setLumpSumRollingXirr(rolling);
         setXirrError(null);
       } catch (err: any) {
-        setXirrError(err.message || 'Error calculating rolling XIRR');
-        setRollingXirr([]);
+        setXirrError(err.message || 'Error calculating lump sum rolling XIRR');
+        setLumpSumRollingXirr([]);
       }
     } else {
-      setRollingXirr([]);
+      setLumpSumRollingXirr([]);
       setFilledNavData(navData);
     }
   }, [navData, navLoading, navError]);
@@ -65,7 +65,7 @@ const App: React.FC = () => {
       {selectedScheme && !navLoading && !navError && navData.length > 0 && (
         <>
           <NavTable navData={filledNavData} />
-          <RollingXirrTable data={rollingXirr} />
+          <RollingXirrTable data={lumpSumRollingXirr} />
           {xirrError && <div style={{ color: 'red', marginTop: 16 }}>{xirrError}</div>}
         </>
       )}

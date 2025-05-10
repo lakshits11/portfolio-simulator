@@ -1,5 +1,5 @@
 import React from 'react';
-import { RollingXirrEntry } from '../utils/rollingXirr';
+import { calculateLumpSumRollingXirr, RollingXirrEntry } from '../utils/lumpSumRollingXirr';
 
 interface RollingXirrTableProps {
   data: RollingXirrEntry[];
@@ -38,7 +38,7 @@ export const RollingXirrTable: React.FC<RollingXirrTableProps> = ({ data }) => {
         <thead>
           <tr>
             <th style={{ borderBottom: '1px solid #ccc', textAlign: 'left', padding: 8, background: '#fafafa', position: 'sticky', top: 0, zIndex: 1 }}>Date</th>
-            <th style={{ borderBottom: '1px solid #ccc', textAlign: 'left', padding: 8, background: '#fafafa', position: 'sticky', top: 0, zIndex: 1 }}>Rolling 1Y XIRR</th>
+            <th style={{ borderBottom: '1px solid #ccc', textAlign: 'left', padding: 8, background: '#fafafa', position: 'sticky', top: 0, zIndex: 1 }}>Lump Sum Rolling 1Y XIRR</th>
           </tr>
         </thead>
       </table>
