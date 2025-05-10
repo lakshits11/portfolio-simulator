@@ -8,5 +8,17 @@ export const fetchMutualFunds = async (): Promise<mfapiMutualFund[]> => {
   if (!response.ok) {
     throw new Error('Failed to fetch mutual funds');
   }
-  return response.json();
+  const allFunds: mfapiMutualFund[] = await response.json();
+  return allFunds
+    .filter(fund =>
+      fund.schemeName.toLowerCase().includes('direct') &&
+      fund.schemeName.toLowerCase().includes('growth') &&
+      !fund.schemeName.toLowerCase().includes('idcw') &&
+      !fund.schemeName.toLowerCase().includes('dividend') &&
+      !fund.schemeName.toLowerCase().includes('days') &&
+      !fund.schemeName.toLowerCase().includes('fixed') &&
+      !fund.schemeName.toLowerCase().includes('series') &&
+      !fund.schemeName.toLowerCase().includes('fmp')
+    )
+    .sort((a, b) => a.schemeName.localeCompare(b.schemeName, undefined, { sensitivity: 'base' }));
 }; 
