@@ -7,7 +7,7 @@ import { useMutualFunds } from './hooks/useMutualFunds';
 import { useNavData } from './hooks/useNavData';
 
 const App: React.FC = () => {
-  const { funds, loading, error, loadFunds } = useMutualFunds();
+  const { funds, loading, error } = useMutualFunds();
   const { navData, loading: navLoading, error: navError, loadNavData } = useNavData();
   const [selectedScheme, setSelectedScheme] = useState<number | null>(null);
 
@@ -16,16 +16,9 @@ const App: React.FC = () => {
     loadNavData(schemeCode);
   };
 
-  const handleLoadClick = async () => {
-    await loadFunds();
-  };
-
   return (
     <Container>
       <h2 style={{ marginBottom: '20px' }}>Mutual Funds</h2>
-      <button onClick={handleLoadClick} style={{ marginBottom: '20px' }} disabled={loading}>
-        Load Mutual Funds
-      </button>
       {loading && <LoadingSpinner />}
       {error && <div style={{ color: 'red' }}>{error}</div>}
       {!loading && !error && funds.length > 0 && (

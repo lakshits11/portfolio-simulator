@@ -19,29 +19,11 @@ describe('App', () => {
     jest.clearAllMocks();
   });
 
-  it('always shows the Load Mutual Funds button', () => {
-    jest.spyOn(useMutualFundsModule, 'useMutualFunds').mockReturnValue({
-      funds: [],
-      loading: false,
-      error: null,
-      loadFunds: jest.fn()
-    });
-    jest.spyOn(useNavDataModule, 'useNavData').mockReturnValue({
-      navData: [],
-      loading: false,
-      error: null,
-      loadNavData: jest.fn()
-    });
-    render(<App />);
-    expect(screen.getByText('Load Mutual Funds')).toBeInTheDocument();
-  });
-
-  it('disables the button and shows spinner while loading', () => {
+  it('shows spinner while loading funds on mount', () => {
     jest.spyOn(useMutualFundsModule, 'useMutualFunds').mockReturnValue({
       funds: [],
       loading: true,
-      error: null,
-      loadFunds: jest.fn()
+      error: null
     });
     jest.spyOn(useNavDataModule, 'useNavData').mockReturnValue({
       navData: [],
@@ -50,8 +32,6 @@ describe('App', () => {
       loadNavData: jest.fn()
     });
     render(<App />);
-    const button = screen.getByText('Load Mutual Funds');
-    expect(button).toBeDisabled();
     expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
 
@@ -59,8 +39,7 @@ describe('App', () => {
     jest.spyOn(useMutualFundsModule, 'useMutualFunds').mockReturnValue({
       funds: mockFunds,
       loading: false,
-      error: null,
-      loadFunds: jest.fn()
+      error: null
     });
     jest.spyOn(useNavDataModule, 'useNavData').mockReturnValue({
       navData: [],
@@ -78,8 +57,7 @@ describe('App', () => {
     jest.spyOn(useMutualFundsModule, 'useMutualFunds').mockReturnValue({
       funds: [],
       loading: false,
-      error: 'Failed to fetch mutual funds',
-      loadFunds: jest.fn()
+      error: 'Failed to fetch mutual funds'
     });
     jest.spyOn(useNavDataModule, 'useNavData').mockReturnValue({
       navData: [],
@@ -96,8 +74,7 @@ describe('App', () => {
     jest.spyOn(useMutualFundsModule, 'useMutualFunds').mockReturnValue({
       funds: mockFunds,
       loading: false,
-      error: null,
-      loadFunds: jest.fn()
+      error: null
     });
     jest.spyOn(useNavDataModule, 'useNavData').mockReturnValue({
       navData: [],
@@ -116,8 +93,7 @@ describe('App', () => {
     jest.spyOn(useMutualFundsModule, 'useMutualFunds').mockReturnValue({
       funds: mockFunds,
       loading: false,
-      error: null,
-      loadFunds: jest.fn()
+      error: null
     });
     jest.spyOn(useNavDataModule, 'useNavData').mockReturnValue({
       navData: mockNavData,
