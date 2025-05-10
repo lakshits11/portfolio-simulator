@@ -4,7 +4,7 @@ import { LoadingSpinner } from './LoadingSpinner';
 
 describe('LoadingSpinner', () => {
   it('renders loading text', () => {
-    render(<LoadingSpinner />);
+    render(<LoadingSpinner text="Loading..." />);
     expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
 }); 

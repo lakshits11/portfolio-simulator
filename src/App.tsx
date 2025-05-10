@@ -11,25 +11,10 @@ import { fillMissingNavDates } from './utils/fillMissingNavDates';
 import { NavEntry } from './types/navData';
 import { calculateSipRollingXirr, SipRollingXirrEntry } from './utils/sipRollingXirr';
 import { SipRollingXirrTable } from './components/SipRollingXirrTable';
+import { getQueryParams, setQueryParams } from './utils/queryParams';
+import { useRollingXirr } from './hooks/useRollingXirr';
 
 const DEFAULT_SCHEME_CODE = 120716;
-
-function getQueryParams() {
-  const params = new URLSearchParams(window.location.search);
-  const scheme = params.get('scheme');
-  const years = params.get('years');
-  return {
-    scheme: scheme ? Number(scheme) : null,
-    years: years ? Number(years) : null,
-  };
-}
-
-function setQueryParams(scheme: number, years: number) {
-  const params = new URLSearchParams(window.location.search);
-  params.set('scheme', String(scheme));
-  params.set('years', String(years));
-  window.history.replaceState({}, '', `?${params.toString()}`);
-}
 
 const App: React.FC = () => {
   const { funds, loading, error } = useMutualFunds();
@@ -41,13 +26,24 @@ const App: React.FC = () => {
     initialParams.scheme || DEFAULT_SCHEME_CODE
   );
   const [years, setYears] = useState<number>(initialParams.years || 1);
-  const [xirrError, setXirrError] = useState<string | null>(null);
-  const [lumpSumRollingXirr, setLumpSumRollingXirr] = useState<RollingXirrEntry[]>([]);
-  const [sipRollingXirr, setSipRollingXirr] = useState<SipRollingXirrEntry[]>([]);
-  const [filledNavData, setFilledNavData] = useState<NavEntry[]>([]);
-  const [rollingLoading, setRollingLoading] = useState<boolean>(false);
-  const [hasPlotted, setHasPlotted] = useState<boolean>(false);
-  const [navRequested, setNavRequested] = useState<boolean>(false);
+
+  // Use custom hook for XIRR logic
+  const {
+    xirrError,
+    lumpSumRollingXirr,
+    sipRollingXirr,
+    filledNavData,
+    rollingLoading,
+    hasPlotted,
+    navRequested,
+    setNavRequested,
+    setHasPlotted,
+    setLumpSumRollingXirr,
+    setSipRollingXirr,
+    setXirrError,
+    setFilledNavData,
+    handlePlot,
+  } = useRollingXirr(navData, navLoading, navError, years);
 
   // Sync state to query string
   useEffect(() => {
@@ -83,42 +79,6 @@ const App: React.FC = () => {
     setNavRequested(false);
   };
 
-  useEffect(() => {
-    if (navRequested && !navLoading && !navError && navData.length > 0) {
-      setRollingLoading(true);
-      setTimeout(() => {
-        try {
-          const filled = fillMissingNavDates(navData);
-          setFilledNavData(filled);
-          const rolling = calculateLumpSumRollingXirr(filled, years);
-          setLumpSumRollingXirr(rolling);
-          const sipRolling = calculateSipRollingXirr(filled, years);
-          setSipRollingXirr(sipRolling);
-          setXirrError(null);
-          setHasPlotted(true);
-        } catch (err: any) {
-          setXirrError(err.message || 'Error calculating rolling XIRR');
-          setLumpSumRollingXirr([]);
-          setSipRollingXirr([]);
-          setHasPlotted(false);
-        } finally {
-          setRollingLoading(false);
-          setNavRequested(false);
-        }
-      }, 0);
-    }
-  }, [navRequested, navLoading, navError, navData, years]);
-
-  const handlePlot = () => {
-    setHasPlotted(false);
-    setLumpSumRollingXirr([]);
-    setSipRollingXirr([]);
-    setXirrError(null);
-    setFilledNavData([]);
-    setNavRequested(true);
-    loadNavData(selectedScheme);
-  };
-
   return (
     <Container>
       <h2 style={{ marginBottom: '20px' }}>Mutual Funds</h2>
@@ -135,7 +95,7 @@ const App: React.FC = () => {
         />
         <button
           style={{ marginLeft: 16, padding: '4px 16px', fontSize: 16 }}
-          onClick={handlePlot}
+          onClick={() => handlePlot(loadNavData, selectedScheme)}
           disabled={navLoading || loading || rollingLoading}
         >
           Plot
