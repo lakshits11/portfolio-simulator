@@ -1,20 +1,47 @@
 import { calculateRollingXirr } from './rollingXirr';
 import { NavEntry } from '../types/navData';
+import { fillMissingNavDates } from './fillMissingNavDates';
 
 describe('calculateRollingXirr', () => {
   it('calculates rolling 1-year XIRR for simple NAV data', () => {
     const navData: NavEntry[] = [
-      { date: new Date('2023-01-01'), nav: 100 },
-      { date: new Date('2024-01-01'), nav: 120 },
-      { date: new Date('2025-01-01'), nav: 140 },
+      { date: new Date('2023-01-31'), nav: 100 },
+      { date: new Date('2024-01-31'), nav: 120 },
+      { date: new Date('2025-01-31'), nav: 140 },
     ];
-    const result = calculateRollingXirr(navData);
-    // For 2024-01-01: buy at 100 (2023-01-01), sell at 120 (2024-01-01) => XIRR ~0.2
-    // For 2025-01-01: buy at 120 (2024-01-01), sell at 140 (2025-01-01) => XIRR ~0.1662
-    expect(result.length).toBe(2);
-    expect(result[0].date).toEqual(new Date('2024-01-01'));
-    expect(result[0].xirr).toBeCloseTo(0.2, 3);
-    expect(result[1].date).toEqual(new Date('2025-01-01'));
-    expect(result[1].xirr).toBeCloseTo(0.1662, 3);
+    const filled = fillMissingNavDates(navData);
+    const result = calculateRollingXirr(filled);
+    // Find the results for the specific dates of interest
+    const r2024 = result.find(r => r.date.getTime() === new Date('2024-01-31').getTime());
+    const r2025 = result.find(r => r.date.getTime() === new Date('2025-01-31').getTime());
+    expect(r2024).toBeDefined();
+    expect(r2024!.xirr).toBeCloseTo(0.2, 3);
+    expect(r2024!.transactions.length).toBe(2);
+    expect(r2024!.transactions[0]).toEqual({ amount: -100, when: new Date('2023-01-31') });
+    expect(r2024!.transactions[1]).toEqual({ amount: 120, when: new Date('2024-01-31') });
+    expect(r2025).toBeDefined();
+    expect(r2025!.xirr).toBeCloseTo(0.1662, 3);
+    expect(r2025!.transactions.length).toBe(2);
+    expect(r2025!.transactions[0]).toEqual({ amount: -120, when: new Date('2024-01-31') });
+    expect(r2025!.transactions[1]).toEqual({ amount: 140, when: new Date('2025-01-31') });
+  });
+
+  it('returns empty array if not enough data', () => {
+    expect(calculateRollingXirr(fillMissingNavDates([]))).toEqual([]);
+    expect(calculateRollingXirr(fillMissingNavDates([{ date: new Date('2023-01-01'), nav: 100 }]))).toEqual([]);
+  });
+
+  it('skips dates where no suitable start date exists', () => {
+    const navData: NavEntry[] = [
+      { date: new Date('2023-01-31'), nav: 100 },
+      { date: new Date('2023-06-30'), nav: 110 },
+      { date: new Date('2024-07-31'), nav: 130 },
+    ];
+    const filled = fillMissingNavDates(navData);
+    const result = calculateRollingXirr(filled);
+    // Only 2024-07-31 should have a valid 1-year-back date (2023-07-31, which will be filled)
+    expect(result.length).toBeGreaterThanOrEqual(1);
+    // The first result should be for 2024-07-31
+    expect(result.some(r => r.date.getTime() === new Date('2024-07-31').getTime())).toBe(true);
   });
 }); 

@@ -5,8 +5,10 @@ import { LoadingSpinner } from './components/LoadingSpinner';
 import { NavTable } from './components/NavTable';
 import { useMutualFunds } from './hooks/useMutualFunds';
 import { useNavData } from './hooks/useNavData';
-import { calculateRollingXirr } from './utils/rollingXirr';
+import { calculateRollingXirr, RollingXirrEntry } from './utils/rollingXirr';
 import { RollingXirrTable } from './components/RollingXirrTable';
+import { fillMissingNavDates } from './utils/fillMissingNavDates';
+import { NavEntry } from './types/navData';
 
 const DEFAULT_SCHEME_CODE = 120716;
 
@@ -14,20 +16,37 @@ const App: React.FC = () => {
   const { funds, loading, error } = useMutualFunds();
   const { navData, loading: navLoading, error: navError, loadNavData } = useNavData();
   const [selectedScheme, setSelectedScheme] = useState<number>(DEFAULT_SCHEME_CODE);
+  const [xirrError, setXirrError] = useState<string | null>(null);
+  const [rollingXirr, setRollingXirr] = useState<RollingXirrEntry[]>([]);
+  const [filledNavData, setFilledNavData] = useState<NavEntry[]>([]);
 
   useEffect(() => {
     loadNavData(DEFAULT_SCHEME_CODE);
     // eslint-disable-next-line
   }, []);
 
+  useEffect(() => {
+    if (!navLoading && !navError && navData.length > 0) {
+      try {
+        const filled = fillMissingNavDates(navData);
+        setFilledNavData(filled);
+        const rolling = calculateRollingXirr(filled);
+        setRollingXirr(rolling);
+        setXirrError(null);
+      } catch (err: any) {
+        setXirrError(err.message || 'Error calculating rolling XIRR');
+        setRollingXirr([]);
+      }
+    } else {
+      setRollingXirr([]);
+      setFilledNavData(navData);
+    }
+  }, [navData, navLoading, navError]);
+
   const handleFundSelect = (schemeCode: number) => {
     setSelectedScheme(schemeCode);
     loadNavData(schemeCode);
   };
-
-  const rollingXirr = (!navLoading && !navError && navData.length > 0)
-    ? calculateRollingXirr(navData)
-    : [];
 
   return (
     <Container>
@@ -45,8 +64,9 @@ const App: React.FC = () => {
       {selectedScheme && navError && <div style={{ color: 'red' }}>{navError}</div>}
       {selectedScheme && !navLoading && !navError && navData.length > 0 && (
         <>
-          <NavTable navData={navData} />
+          <NavTable navData={filledNavData} />
           <RollingXirrTable data={rollingXirr} />
+          {xirrError && <div style={{ color: 'red', marginTop: 16 }}>{xirrError}</div>}
         </>
       )}
     </Container>
