@@ -23,14 +23,33 @@ const App: React.FC = () => {
   const [sipRollingXirr, setSipRollingXirr] = useState<SipRollingXirrEntry[]>([]);
   const [filledNavData, setFilledNavData] = useState<NavEntry[]>([]);
   const [years, setYears] = useState<number>(1);
+  const [rollingLoading, setRollingLoading] = useState<boolean>(false);
+  const [hasPlotted, setHasPlotted] = useState<boolean>(false);
 
   useEffect(() => {
     loadNavData(DEFAULT_SCHEME_CODE);
     // eslint-disable-next-line
   }, []);
 
-  useEffect(() => {
-    if (!navLoading && !navError && navData.length > 0) {
+  const handleFundSelect = (schemeCode: number) => {
+    setSelectedScheme(schemeCode);
+    setHasPlotted(false);
+    setLumpSumRollingXirr([]);
+    setSipRollingXirr([]);
+    setXirrError(null);
+  };
+
+  const handleYearsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setYears(Math.max(1, Math.floor(Number(e.target.value))));
+    setHasPlotted(false);
+    setLumpSumRollingXirr([]);
+    setSipRollingXirr([]);
+    setXirrError(null);
+  };
+
+  const handlePlot = () => {
+    setRollingLoading(true);
+    setTimeout(() => {
       try {
         const filled = fillMissingNavDates(navData);
         setFilledNavData(filled);
@@ -39,21 +58,16 @@ const App: React.FC = () => {
         const sipRolling = calculateSipRollingXirr(filled, years);
         setSipRollingXirr(sipRolling);
         setXirrError(null);
+        setHasPlotted(true);
       } catch (err: any) {
         setXirrError(err.message || 'Error calculating rolling XIRR');
         setLumpSumRollingXirr([]);
         setSipRollingXirr([]);
+        setHasPlotted(false);
+      } finally {
+        setRollingLoading(false);
       }
-    } else {
-      setLumpSumRollingXirr([]);
-      setSipRollingXirr([]);
-      setFilledNavData(navData);
-    }
-  }, [navData, navLoading, navError, years]);
-
-  const handleFundSelect = (schemeCode: number) => {
-    setSelectedScheme(schemeCode);
-    loadNavData(schemeCode);
+    }, 0);
   };
 
   return (
@@ -67,9 +81,16 @@ const App: React.FC = () => {
           min={1}
           max={30}
           value={years}
-          onChange={e => setYears(Math.max(1, Math.floor(Number(e.target.value))))}
+          onChange={handleYearsChange}
           style={{ width: 60, marginLeft: 8 }}
         />
+        <button
+          style={{ marginLeft: 16, padding: '4px 16px', fontSize: 16 }}
+          onClick={handlePlot}
+          disabled={navLoading || loading || rollingLoading}
+        >
+          Plot
+        </button>
       </div>
       {loading && <LoadingSpinner />}
       {error && <div style={{ color: 'red' }}>{error}</div>}
@@ -83,12 +104,14 @@ const App: React.FC = () => {
       {selectedScheme && navLoading && <LoadingSpinner />}
       {selectedScheme && navError && <div style={{ color: 'red' }}>{navError}</div>}
       {selectedScheme && !navLoading && !navError && navData.length > 0 && (
-        <>
-          <NavTable navData={filledNavData} />
-          <RollingXirrTable data={lumpSumRollingXirr} />
-          <SipRollingXirrTable data={sipRollingXirr} />
-          {xirrError && <div style={{ color: 'red', marginTop: 16 }}>{xirrError}</div>}
-        </>
+        rollingLoading ? <LoadingSpinner /> : (
+          hasPlotted && <>
+            <NavTable navData={filledNavData} />
+            <RollingXirrTable data={lumpSumRollingXirr} />
+            <SipRollingXirrTable data={sipRollingXirr} />
+            {xirrError && <div style={{ color: 'red', marginTop: 16 }}>{xirrError}</div>}
+          </>
+        )
       )}
     </Container>
   );
