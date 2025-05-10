@@ -9,6 +9,8 @@ import { calculateLumpSumRollingXirr, RollingXirrEntry } from './utils/lumpSumRo
 import { RollingXirrTable } from './components/RollingXirrTable';
 import { fillMissingNavDates } from './utils/fillMissingNavDates';
 import { NavEntry } from './types/navData';
+import { calculateSipRollingXirr, SipRollingXirrEntry } from './utils/sipRollingXirr';
+import { SipRollingXirrTable } from './components/SipRollingXirrTable';
 
 const DEFAULT_SCHEME_CODE = 120716;
 
@@ -18,6 +20,7 @@ const App: React.FC = () => {
   const [selectedScheme, setSelectedScheme] = useState<number>(DEFAULT_SCHEME_CODE);
   const [xirrError, setXirrError] = useState<string | null>(null);
   const [lumpSumRollingXirr, setLumpSumRollingXirr] = useState<RollingXirrEntry[]>([]);
+  const [sipRollingXirr, setSipRollingXirr] = useState<SipRollingXirrEntry[]>([]);
   const [filledNavData, setFilledNavData] = useState<NavEntry[]>([]);
 
   useEffect(() => {
@@ -32,13 +35,17 @@ const App: React.FC = () => {
         setFilledNavData(filled);
         const rolling = calculateLumpSumRollingXirr(filled);
         setLumpSumRollingXirr(rolling);
+        const sipRolling = calculateSipRollingXirr(filled);
+        setSipRollingXirr(sipRolling);
         setXirrError(null);
       } catch (err: any) {
-        setXirrError(err.message || 'Error calculating lump sum rolling XIRR');
+        setXirrError(err.message || 'Error calculating rolling XIRR');
         setLumpSumRollingXirr([]);
+        setSipRollingXirr([]);
       }
     } else {
       setLumpSumRollingXirr([]);
+      setSipRollingXirr([]);
       setFilledNavData(navData);
     }
   }, [navData, navLoading, navError]);
@@ -66,6 +73,7 @@ const App: React.FC = () => {
         <>
           <NavTable navData={filledNavData} />
           <RollingXirrTable data={lumpSumRollingXirr} />
+          <SipRollingXirrTable data={sipRollingXirr} />
           {xirrError && <div style={{ color: 'red', marginTop: 16 }}>{xirrError}</div>}
         </>
       )}

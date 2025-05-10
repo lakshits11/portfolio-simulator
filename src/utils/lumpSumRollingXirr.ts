@@ -1,11 +1,12 @@
 import xirr from 'xirr';
 import { NavEntry } from '../types/navData';
 import { areDatesContinuous, getNthPreviousMonthDate } from './dateUtils';
+import { fillMissingNavDates } from './fillMissingNavDates';
 
 export interface RollingXirrEntry {
   date: Date;
   xirr: number;
-  transactions: { amount: number; when: Date }[];
+  transactions: { nav: number; when: Date }[];
 }
 
 /**
@@ -17,11 +18,12 @@ export interface RollingXirrEntry {
  */
 export function calculateLumpSumRollingXirr(navData: NavEntry[]): RollingXirrEntry[] {
   if (navData.length < 2) return [];
-  if (!areDatesContinuous(navData)) {
-    throw new Error('NAV dates are not continuous');
+  let data = navData;
+  if (!areDatesContinuous(data)) {
+    data = fillMissingNavDates(data);
   }
   // Sort ascending by date
-  const sorted = [...navData].sort((a, b) => a.date.getTime() - b.date.getTime());
+  const sorted = [...data].sort((a, b) => a.date.getTime() - b.date.getTime());
   const result: RollingXirrEntry[] = [];
   const firstDate = sorted[0].date;
 
@@ -37,12 +39,17 @@ export function calculateLumpSumRollingXirr(navData: NavEntry[]): RollingXirrEnt
     );
     if (startIdx === -1) continue; // Should not happen after filling, but safe check
     const start = sorted[startIdx];
-    const transactions = [
+    // For XIRR calculation, keep using cashflow, but for transactions array, store NAV
+    const xirrTransactions = [
       { amount: -start.nav, when: start.date },
       { amount: current.nav, when: current.date },
     ];
+    const transactions = [
+      { nav: start.nav, when: start.date },
+      { nav: current.nav, when: current.date },
+    ];
     try {
-      const rate = xirr(transactions);
+      const rate = xirr(xirrTransactions);
       result.push({ date: current.date, xirr: rate, transactions });
     } catch {
       // If xirr fails to converge, skip

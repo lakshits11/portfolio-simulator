@@ -1,15 +1,15 @@
 import React from 'react';
-import { calculateLumpSumRollingXirr, RollingXirrEntry } from '../utils/lumpSumRollingXirr';
+import { SipRollingXirrEntry } from '../utils/sipRollingXirr';
 
-interface RollingXirrTableProps {
-  data: RollingXirrEntry[];
+interface SipRollingXirrTableProps {
+  data: SipRollingXirrEntry[];
 }
 
 function formatDate(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
-export const RollingXirrTable: React.FC<RollingXirrTableProps> = ({ data }) => {
+export const SipRollingXirrTable: React.FC<SipRollingXirrTableProps> = ({ data }) => {
   if (!data.length) return null;
   const displayData = [...data].sort((a, b) => b.date.getTime() - a.date.getTime());
   return (
@@ -38,7 +38,7 @@ export const RollingXirrTable: React.FC<RollingXirrTableProps> = ({ data }) => {
         <thead>
           <tr>
             <th style={{ borderBottom: '1px solid #ccc', textAlign: 'left', padding: 8, background: '#fafafa', position: 'sticky', top: 0, zIndex: 1 }}>Date</th>
-            <th style={{ borderBottom: '1px solid #ccc', textAlign: 'left', padding: 8, background: '#fafafa', position: 'sticky', top: 0, zIndex: 1 }}>Lump Sum Rolling 1Y XIRR</th>
+            <th style={{ borderBottom: '1px solid #ccc', textAlign: 'left', padding: 8, background: '#fafafa', position: 'sticky', top: 0, zIndex: 1 }}>SIP Rolling 1Y XIRR</th>
           </tr>
         </thead>
       </table>
@@ -51,8 +51,11 @@ export const RollingXirrTable: React.FC<RollingXirrTableProps> = ({ data }) => {
                 <td style={{ padding: 8, position: 'relative' }}>
                   {(entry.xirr * 100).toFixed(2)}%
                   <div className="xirr-tooltip">
-                    <div><strong>Buy NAV:</strong> {formatDate(entry.transactions[0].when)} @ {entry.transactions[0].nav.toFixed(5)}</div>
-                    <div><strong>Sell NAV:</strong> {formatDate(entry.transactions[1].when)} @ {entry.transactions[1].nav.toFixed(5)}</div>
+                    <div><strong>Buy NAVs:</strong></div>
+                    {entry.transactions.slice(0, -1).map((tx, i) => (
+                      <div key={i}> {formatDate(tx.when)} @ {tx.nav.toFixed(5)}</div>
+                    ))}
+                    <div><strong>Sell NAV:</strong> {formatDate(entry.transactions[entry.transactions.length-1].when)} @ {entry.transactions[entry.transactions.length-1].nav.toFixed(5)}</div>
                     <div><strong>XIRR:</strong> {entry.xirr.toFixed(5)}</div>
                   </div>
                 </td>
