@@ -25,11 +25,7 @@ const App: React.FC = () => {
   const [years, setYears] = useState<number>(1);
   const [rollingLoading, setRollingLoading] = useState<boolean>(false);
   const [hasPlotted, setHasPlotted] = useState<boolean>(false);
-
-  useEffect(() => {
-    loadNavData(DEFAULT_SCHEME_CODE);
-    // eslint-disable-next-line
-  }, []);
+  const [navRequested, setNavRequested] = useState<boolean>(false);
 
   const handleFundSelect = (schemeCode: number) => {
     setSelectedScheme(schemeCode);
@@ -38,7 +34,7 @@ const App: React.FC = () => {
     setSipRollingXirr([]);
     setXirrError(null);
     setFilledNavData([]);
-    loadNavData(schemeCode);
+    setNavRequested(false);
   };
 
   const handleYearsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,29 +44,43 @@ const App: React.FC = () => {
     setSipRollingXirr([]);
     setXirrError(null);
     setFilledNavData([]);
+    setNavRequested(false);
   };
 
+  useEffect(() => {
+    if (navRequested && !navLoading && !navError && navData.length > 0) {
+      setRollingLoading(true);
+      setTimeout(() => {
+        try {
+          const filled = fillMissingNavDates(navData);
+          setFilledNavData(filled);
+          const rolling = calculateLumpSumRollingXirr(filled, years);
+          setLumpSumRollingXirr(rolling);
+          const sipRolling = calculateSipRollingXirr(filled, years);
+          setSipRollingXirr(sipRolling);
+          setXirrError(null);
+          setHasPlotted(true);
+        } catch (err: any) {
+          setXirrError(err.message || 'Error calculating rolling XIRR');
+          setLumpSumRollingXirr([]);
+          setSipRollingXirr([]);
+          setHasPlotted(false);
+        } finally {
+          setRollingLoading(false);
+          setNavRequested(false);
+        }
+      }, 0);
+    }
+  }, [navRequested, navLoading, navError, navData, years]);
+
   const handlePlot = () => {
-    setRollingLoading(true);
-    setTimeout(() => {
-      try {
-        const filled = fillMissingNavDates(navData);
-        setFilledNavData(filled);
-        const rolling = calculateLumpSumRollingXirr(filled, years);
-        setLumpSumRollingXirr(rolling);
-        const sipRolling = calculateSipRollingXirr(filled, years);
-        setSipRollingXirr(sipRolling);
-        setXirrError(null);
-        setHasPlotted(true);
-      } catch (err: any) {
-        setXirrError(err.message || 'Error calculating rolling XIRR');
-        setLumpSumRollingXirr([]);
-        setSipRollingXirr([]);
-        setHasPlotted(false);
-      } finally {
-        setRollingLoading(false);
-      }
-    }, 0);
+    setHasPlotted(false);
+    setLumpSumRollingXirr([]);
+    setSipRollingXirr([]);
+    setXirrError(null);
+    setFilledNavData([]);
+    setNavRequested(true);
+    loadNavData(selectedScheme);
   };
 
   return (
@@ -104,7 +114,7 @@ const App: React.FC = () => {
           value={selectedScheme}
         />
       )}
-      {selectedScheme && navLoading && <LoadingSpinner text="Loading NAV data..." />}
+      {navRequested && navLoading && <LoadingSpinner text="Loading NAV data..." />}
       {selectedScheme && navError && <div style={{ color: 'red' }}>{navError}</div>}
       {(hasPlotted || rollingLoading) && selectedScheme && !navLoading && !navError && navData.length > 0 && (
         rollingLoading ? <LoadingSpinner text="Calculating XIRR..." /> : (
