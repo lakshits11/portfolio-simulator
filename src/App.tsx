@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MutualFundDropdown } from './components/MutualFundDropdown';
 import { Container } from './components/Container';
 import { LoadingSpinner } from './components/LoadingSpinner';
@@ -8,10 +8,17 @@ import { useNavData } from './hooks/useNavData';
 import { calculateRollingXirr } from './utils/rollingXirr';
 import { RollingXirrTable } from './components/RollingXirrTable';
 
+const DEFAULT_SCHEME_CODE = 120716;
+
 const App: React.FC = () => {
   const { funds, loading, error } = useMutualFunds();
   const { navData, loading: navLoading, error: navError, loadNavData } = useNavData();
-  const [selectedScheme, setSelectedScheme] = useState<number | null>(null);
+  const [selectedScheme, setSelectedScheme] = useState<number>(DEFAULT_SCHEME_CODE);
+
+  useEffect(() => {
+    loadNavData(DEFAULT_SCHEME_CODE);
+    // eslint-disable-next-line
+  }, []);
 
   const handleFundSelect = (schemeCode: number) => {
     setSelectedScheme(schemeCode);
@@ -31,6 +38,7 @@ const App: React.FC = () => {
         <MutualFundDropdown 
           funds={funds} 
           onSelect={handleFundSelect}
+          value={selectedScheme}
         />
       )}
       {selectedScheme && navLoading && <LoadingSpinner />}
