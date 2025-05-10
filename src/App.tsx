@@ -22,6 +22,7 @@ const App: React.FC = () => {
   const [lumpSumRollingXirr, setLumpSumRollingXirr] = useState<RollingXirrEntry[]>([]);
   const [sipRollingXirr, setSipRollingXirr] = useState<SipRollingXirrEntry[]>([]);
   const [filledNavData, setFilledNavData] = useState<NavEntry[]>([]);
+  const [years, setYears] = useState<number>(1);
 
   useEffect(() => {
     loadNavData(DEFAULT_SCHEME_CODE);
@@ -33,9 +34,9 @@ const App: React.FC = () => {
       try {
         const filled = fillMissingNavDates(navData);
         setFilledNavData(filled);
-        const rolling = calculateLumpSumRollingXirr(filled);
+        const rolling = calculateLumpSumRollingXirr(filled, years);
         setLumpSumRollingXirr(rolling);
-        const sipRolling = calculateSipRollingXirr(filled);
+        const sipRolling = calculateSipRollingXirr(filled, years);
         setSipRollingXirr(sipRolling);
         setXirrError(null);
       } catch (err: any) {
@@ -48,7 +49,7 @@ const App: React.FC = () => {
       setSipRollingXirr([]);
       setFilledNavData(navData);
     }
-  }, [navData, navLoading, navError]);
+  }, [navData, navLoading, navError, years]);
 
   const handleFundSelect = (schemeCode: number) => {
     setSelectedScheme(schemeCode);
@@ -58,6 +59,18 @@ const App: React.FC = () => {
   return (
     <Container>
       <h2 style={{ marginBottom: '20px' }}>Mutual Funds</h2>
+      <div style={{ marginBottom: 16 }}>
+        <label htmlFor="years-input">Rolling Period (years): </label>
+        <input
+          id="years-input"
+          type="number"
+          min={1}
+          max={30}
+          value={years}
+          onChange={e => setYears(Math.max(1, Math.floor(Number(e.target.value))))}
+          style={{ width: 60, marginLeft: 8 }}
+        />
+      </div>
       {loading && <LoadingSpinner />}
       {error && <div style={{ color: 'red' }}>{error}</div>}
       {!loading && !error && funds.length > 0 && (

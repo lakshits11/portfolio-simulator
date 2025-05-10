@@ -9,7 +9,7 @@ export interface SipRollingXirrEntry {
   transactions: { nav: number; when: Date }[];
 }
 
-export function calculateSipRollingXirr(navData: NavEntry[]): SipRollingXirrEntry[] {
+export function calculateSipRollingXirr(navData: NavEntry[], years: number = 1): SipRollingXirrEntry[] {
   if (navData.length < 2) return [];
   let data = navData;
   if (!areDatesContinuous(data)) {
@@ -18,10 +18,11 @@ export function calculateSipRollingXirr(navData: NavEntry[]): SipRollingXirrEntr
   const sorted = [...data].sort((a, b) => a.date.getTime() - b.date.getTime());
   const result: SipRollingXirrEntry[] = [];
   const firstDate = sorted[0].date;
+  const months = 12 * years;
 
   for (let i = 0; i < sorted.length; i++) {
     const current = sorted[i];
-    const { buys, totalUnits, valid } = getSipBuyTransactions(sorted, current, firstDate, 12);
+    const { buys, totalUnits, valid } = getSipBuyTransactions(sorted, current, firstDate, months);
     if (!valid) continue;
     const sell = getSipSellTransaction(current, totalUnits);
     const xirrTransactions = getSipXirrTransactions(buys, sell);

@@ -16,7 +16,7 @@ export interface RollingXirrEntry {
  * Throws an error if the dates are not continuous (no missing days).
  * Assumes input is already filled for missing dates.
  */
-export function calculateLumpSumRollingXirr(navData: NavEntry[]): RollingXirrEntry[] {
+export function calculateLumpSumRollingXirr(navData: NavEntry[], years: number = 1): RollingXirrEntry[] {
   if (navData.length < 2) return [];
   let data = navData;
   if (!areDatesContinuous(data)) {
@@ -29,17 +29,16 @@ export function calculateLumpSumRollingXirr(navData: NavEntry[]): RollingXirrEnt
 
   for (let i = 0; i < sorted.length; i++) {
     const current = sorted[i];
-    const oneYearAgo = getNthPreviousMonthDate(current.date, 12);
-    if (oneYearAgo < firstDate) continue;
-    // Find the entry with the exact same date as oneYearAgo (guaranteed to exist after filling)
+    const months = 12 * years;
+    const periodAgo = getNthPreviousMonthDate(current.date, months);
+    if (periodAgo < firstDate) continue;
     const startIdx = sorted.findIndex(entry =>
-      entry.date.getFullYear() === oneYearAgo.getFullYear() &&
-      entry.date.getMonth() === oneYearAgo.getMonth() &&
-      entry.date.getDate() === oneYearAgo.getDate()
+      entry.date.getFullYear() === periodAgo.getFullYear() &&
+      entry.date.getMonth() === periodAgo.getMonth() &&
+      entry.date.getDate() === periodAgo.getDate()
     );
-    if (startIdx === -1) continue; // Should not happen after filling, but safe check
+    if (startIdx === -1) continue;
     const start = sorted[startIdx];
-    // For XIRR calculation, keep using cashflow, but for transactions array, store NAV
     const xirrTransactions = [
       { amount: -start.nav, when: start.date },
       { amount: current.nav, when: current.date },
@@ -48,13 +47,8 @@ export function calculateLumpSumRollingXirr(navData: NavEntry[]): RollingXirrEnt
       { nav: start.nav, when: start.date },
       { nav: current.nav, when: current.date },
     ];
-    try {
-      const rate = xirr(xirrTransactions);
-      result.push({ date: current.date, xirr: rate, transactions });
-    } catch {
-      // If xirr fails to converge, skip
-      continue;
-    }
+    const rate = xirr(xirrTransactions);
+    result.push({ date: current.date, xirr: rate, transactions });
   }
   return result;
 } 
