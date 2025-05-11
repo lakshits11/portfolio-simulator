@@ -10,45 +10,118 @@ export interface RollingXirrEntry {
 }
 
 /**
- * Calculates lump sum rolling 1-year XIRR for a series of NAV entries.
- * For each date, uses getNthPreviousMonthDate to get the date 12 months before,
- * and uses the NAV for that date (after filling missing dates). If the calculated date is before the start, skip.
- * Throws an error if the dates are not continuous (no missing days).
- * Assumes input is already filled for missing dates.
+ * Calculates lump sum rolling XIRR for a portfolio of funds.
+ * Each fund's NAV data should be provided as an array in the input array.
+ * Investments are split equally across all funds.
+ *
+ * @param navDataList Array of arrays of NavEntry (one per fund)
+ * @param years Rolling window size in years (default 1)
+ * @param investmentAmount Total investment amount (default 100)
  */
-export function calculateLumpSumRollingXirr(navData: NavEntry[], years: number = 1): RollingXirrEntry[] {
-  if (navData.length < 2) return [];
-  let data = navData;
-  if (!areDatesContinuous(data)) {
-    data = fillMissingNavDates(data);
+export function calculateLumpSumRollingXirr(
+  navDataList: NavEntry[][],
+  years: number = 1,
+  investmentAmount: number = 100
+): RollingXirrEntry[] {
+  // Ensure we have at least one fund with at least 2 entries
+  if (navDataList.length === 0 || navDataList.some(fund => fund.length < 2)) {
+    return [];
   }
-  // Sort ascending by date
-  const sorted = [...data].sort((a, b) => a.date.getTime() - b.date.getTime());
-  const result: RollingXirrEntry[] = [];
-  const firstDate = sorted[0].date;
 
-  for (let i = 0; i < sorted.length; i++) {
-    const current = sorted[i];
-    const months = 12 * years;
-    const periodAgo = getNthPreviousMonthDate(current.date, months);
-    if (periodAgo < firstDate) continue;
+  const numFunds = navDataList.length;
+  const filledNavs = navDataList.map(fund => {
+    let data = fund;
+    if (!areDatesContinuous(data)) {
+      data = fillMissingNavDates(data);
+    }
+    return data;
+  });
+
+  // Get a consolidated list of dates from the first fund (after filling)
+  const sorted = [...filledNavs[0]].sort((a, b) => a.date.getTime() - b.date.getTime());
+  const dateList = sorted.map(entry => entry.date);
+  const result: RollingXirrEntry[] = [];
+  const firstDate = dateList[0];
+  const months = 12 * years;
+
+  for (let i = 0; i < dateList.length; i++) {
+    const endDate = dateList[i];
+    const startDate = getNthPreviousMonthDate(endDate, months);
+    if (startDate < firstDate) continue;
+    
+    // Find start index in the first fund (all funds should be aligned after filling)
     const startIdx = sorted.findIndex(entry =>
-      entry.date.getFullYear() === periodAgo.getFullYear() &&
-      entry.date.getMonth() === periodAgo.getMonth() &&
-      entry.date.getDate() === periodAgo.getDate()
+      entry.date.getFullYear() === startDate.getFullYear() &&
+      entry.date.getMonth() === startDate.getMonth() &&
+      entry.date.getDate() === startDate.getDate()
     );
     if (startIdx === -1) continue;
-    const start = sorted[startIdx];
+
+    // For each fund, calculate units bought at start and value at end
+    const fundUnits: number[] = [];
+    let valid = true;
+    
+    // Calculate units purchased for each fund with equal allocation
+    for (let f = 0; f < numFunds; f++) {
+      const fundNav = filledNavs[f];
+      const startEntry = fundNav.find(entry => 
+        entry.date.getFullYear() === startDate.getFullYear() &&
+        entry.date.getMonth() === startDate.getMonth() &&
+        entry.date.getDate() === startDate.getDate()
+      );
+      
+      if (!startEntry) { 
+        valid = false; 
+        break; 
+      }
+      
+      const fundAllocation = investmentAmount / numFunds;
+      fundUnits[f] = fundAllocation / startEntry.nav;
+    }
+    
+    if (!valid) continue;
+    
+    // Calculate total portfolio value at end date
+    let totalValue = 0;
+    for (let f = 0; f < numFunds; f++) {
+      const fundNav = filledNavs[f];
+      const endEntry = fundNav.find(entry => 
+        entry.date.getFullYear() === endDate.getFullYear() &&
+        entry.date.getMonth() === endDate.getMonth() &&
+        entry.date.getDate() === endDate.getDate()
+      );
+      
+      if (!endEntry) { 
+        valid = false; 
+        break; 
+      }
+      
+      totalValue += fundUnits[f] * endEntry.nav;
+    }
+    
+    if (!valid) continue;
+
+    // Prepare transactions for XIRR
     const xirrTransactions = [
-      { amount: -start.nav, when: start.date },
-      { amount: current.nav, when: current.date },
+      { amount: -investmentAmount, when: startDate },
+      { amount: totalValue, when: endDate }
     ];
+    
+    // Match the expected interface format
     const transactions = [
-      { nav: start.nav, when: start.date },
-      { nav: current.nav, when: current.date },
+      { nav: investmentAmount, when: startDate },
+      { nav: totalValue, when: endDate }
     ];
-    const rate = xirr(xirrTransactions);
-    result.push({ date: current.date, xirr: rate, transactions });
+    
+    let rate: number;
+    try {
+      rate = xirr(xirrTransactions);
+    } catch {
+      continue; // Skip if XIRR calculation fails
+    }
+    
+    result.push({ date: endDate, xirr: rate, transactions });
   }
+  
   return result;
 } 

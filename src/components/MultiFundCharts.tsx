@@ -68,25 +68,6 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
 
   return (
     <div style={{ marginTop: 32 }}>
-      <HighchartsReact
-        highcharts={Highcharts}
-        options={{
-          title: { text: 'NAV Over Time' },
-          xAxis: {
-            categories: getNavCategories(),
-            title: { text: 'Date' },
-            labels: { rotation: -45 }
-          },
-          yAxis: {
-            title: { text: 'NAV' }
-          },
-          series: getNavSeries(),
-          chart: { height: 350 },
-          credits: { enabled: false },
-          legend: { enabled: true },
-          tooltip: { valueDecimals: 2 },
-        }}
-      />
       <div style={{ marginTop: 24 }}>
         <HighchartsReact
           highcharts={Highcharts}

@@ -32,7 +32,7 @@ const App: React.FC = () => {
   );
   const [years, setYears] = useState<number>(initialParams.years || 1);
   const [navDatas, setNavDatas] = useState<Record<number, any[]>>({});
-  const [lumpSumXirrDatas, setLumpSumXirrDatas] = useState<Record<number, any[]>>({});
+  const [lumpSumXirrDatas, setLumpSumXirrDatas] = useState<Record<string, any[]>>({});
   const [sipXirrDatas, setSipXirrDatas] = useState<Record<number, any[]>>({});
   const [hasPlotted, setHasPlotted] = useState(false);
   const [loadingFunds, setLoadingFunds] = useState(false);
@@ -81,19 +81,29 @@ const App: React.FC = () => {
     setXirrError(null);
     try {
       const navs: Record<number, any[]> = {};
-      const lumpSum: Record<number, any[]> = {};
-      const sip: Record<number, any[]> = {};
+      const filledNavs: any[][] = [];
       for (const scheme of selectedSchemes) {
         if (!scheme) continue;
         const nav = await loadNavData(scheme);
         if (!Array.isArray(nav) || nav.length === 0) continue;
         const filled = fillMissingNavDates(nav);
         navs[scheme] = filled;
-        lumpSum[scheme] = calculateLumpSumRollingXirr(filled, years);
-        sip[scheme] = calculateSipRollingXirr(filled, years);
+        filledNavs.push(filled);
       }
       setNavDatas(navs);
-      setLumpSumXirrDatas(lumpSum);
+
+      // Portfolio XIRR calculation (single series)
+      const lumpSum = calculateLumpSumRollingXirr(filledNavs, years);
+      setLumpSumXirrDatas({ portfolio: lumpSum });
+
+      // (SIP logic remains per-fund for now)
+      const sip: Record<number, any[]> = {};
+      for (const scheme of selectedSchemes) {
+        if (!scheme) continue;
+        const nav = navs[scheme];
+        if (!Array.isArray(nav) || nav.length === 0) continue;
+        sip[scheme] = calculateSipRollingXirr(nav, years);
+      }
       setSipXirrDatas(sip);
       setHasPlotted(true);
     } catch (e) {
