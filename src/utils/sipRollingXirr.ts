@@ -33,7 +33,7 @@ function getSipBuyTransactions(sorted: NavEntry[], current: NavEntry, firstDate:
   return { buys, totalUnits, valid: true };
 }
 
-function getSipSellTransaction(current: NavEntry, totalUnits: number, fundIdx: number) {
+function getSipSellTransaction(current: NavEntry, totalUnits: number, fundIdx: number): { fundIdx: number; nav: number; when: Date; units: number; amount: number; type: 'sell' } {
   return { fundIdx, nav: current.nav, when: current.date, units: totalUnits, amount: totalUnits * current.nav, type: 'sell' };
 }
 

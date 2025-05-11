@@ -64,7 +64,20 @@ describe('calculateSipRollingXirrMultipleFunds', () => {
     // Should have at least one result for the last date
     const last = result[result.length - 1];
     expect(last).toBeDefined();
-    expect(last.transactions.length).toBe(25); // 12 SIPs per fund * 2 + 1 sell
+    expect(last.transactions.length).toBe(26); // (12 SIPs + 1 sell) per fund * 2
     expect(typeof last.xirr).toBe('number');
+
+    // Simulate the fund list for a portfolio
+    const portfolioFunds = [
+      { schemeCode: 1, schemeName: 'Fund A' },
+      { schemeCode: 2, schemeName: 'Fund B' },
+    ];
+    // For each transaction, fundIdx should map to the correct fund
+    last.transactions.forEach(tx => {
+      expect(tx.fundIdx === 0 || tx.fundIdx === 1).toBe(true);
+      const fund = portfolioFunds[tx.fundIdx];
+      expect(fund).toBeDefined();
+      expect(['Fund A', 'Fund B']).toContain(fund.schemeName);
+    });
   });
 }); 

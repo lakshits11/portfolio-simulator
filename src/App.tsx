@@ -261,6 +261,8 @@ const App: React.FC = () => {
               COLORS={plotState.COLORS}
               loadingNav={plotState.loadingNav}
               loadingXirr={plotState.loadingXirr}
+              portfolioSchemes={portfolios.map(p => p.selectedSchemes)}
+              portfolios={portfolios}
             />
           </>
         )}

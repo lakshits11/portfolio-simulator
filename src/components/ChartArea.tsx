@@ -13,6 +13,8 @@ interface ChartAreaProps {
   COLORS: string[];
   loadingNav?: boolean;
   loadingXirr?: boolean;
+  portfolioSchemes: (number | null)[][];
+  portfolios: { selectedSchemes: (number | null)[] }[];
 }
 
 export const ChartArea: React.FC<ChartAreaProps> = ({
@@ -25,6 +27,8 @@ export const ChartArea: React.FC<ChartAreaProps> = ({
   COLORS,
   loadingNav = false,
   loadingXirr = false,
+  portfolioSchemes,
+  portfolios,
 }) => (
   <>
     {xirrError && <div style={{ color: 'red', marginTop: 16 }}>{xirrError}</div>}
@@ -48,6 +52,8 @@ export const ChartArea: React.FC<ChartAreaProps> = ({
             sipXirrDatas={sipXirrDatas}
             funds={funds}
             COLORS={COLORS}
+            portfolioSchemes={portfolioSchemes}
+            portfolios={portfolios}
           />
         )
       )}

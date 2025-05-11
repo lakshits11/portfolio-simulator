@@ -13,12 +13,14 @@ interface MultiFundChartsProps {
   sipXirrDatas: Record<number, any[]>;
   funds: mfapiMutualFund[];
   COLORS: string[];
+  portfolioSchemes: (number | null)[][];
+  portfolios: { selectedSchemes: (number | null)[] }[];
 }
 
 interface TransactionModalProps {
   visible: boolean;
   onClose: () => void;
-  transactions: { nav: number; when: Date }[];
+  transactions: { fundIdx: number; nav: number; when: Date; units: number; amount: number; type: 'buy' | 'sell' }[];
   date: string;
   xirr: number;
   portfolioName: string;
@@ -122,14 +124,17 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
   sipXirrDatas,
   funds,
   COLORS,
+  portfolioSchemes,
+  portfolios,
 }) => {
   const [modal, setModal] = useState<{
     visible: boolean;
-    transactions: { nav: number; when: Date }[];
+    transactions: { fundIdx: number; nav: number; when: Date; units: number; amount: number; type: 'buy' | 'sell' }[];
     date: string;
     xirr: number;
     portfolioName: string;
-  }>({ visible: false, transactions: [], date: '', xirr: 0, portfolioName: '' });
+    portfolioFunds: mfapiMutualFund[];
+  }>({ visible: false, transactions: [], date: '', xirr: 0, portfolioName: '', portfolioFunds: [] });
 
   const getFundName = (schemeCode: number) => {
     const fund = funds.find(f => f.schemeCode === schemeCode);
@@ -191,9 +196,18 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
   };
   const getSipCategories = () => getAllDates();
 
+  // Helper to get the funds for a portfolio by name (e.g., 'Portfolio 1')
+  const getPortfolioFunds = (portfolioName: string): mfapiMutualFund[] => {
+    const idx = parseInt(portfolioName.replace('Portfolio ', '')) - 1;
+    const schemeCodes = portfolioSchemes[idx] || [];
+    return schemeCodes
+      .filter((code): code is number => code !== null && code !== undefined)
+      .map(code => funds.find(f => f.schemeCode === code)).filter(Boolean) as mfapiMutualFund[];
+  };
+
   return (
     <div style={{ marginTop: 32 }}>
-      <TransactionModal {...modal} onClose={() => setModal(m => ({ ...m, visible: false }))} funds={funds} />
+      <TransactionModal {...modal} onClose={() => setModal(m => ({ ...m, visible: false }))} funds={modal.portfolioFunds} />
       {/*
       <div style={{ marginTop: 24 }}>
         <HighchartsReact
@@ -250,12 +264,14 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
                       // Find the XIRR entry for this portfolio and date
                       const xirrEntry = (sipXirrDatas[portfolioName] || []).find((row: any) => formatDate(row.date) === pointDate);
                       if (xirrEntry) {
+                        const portfolioFunds = getPortfolioFunds(portfolioName);
                         setModal({
                           visible: true,
                           transactions: xirrEntry.transactions || [],
                           date: pointDate,
                           xirr: xirrEntry.xirr,
                           portfolioName,
+                          portfolioFunds,
                         });
                       }
                     }
