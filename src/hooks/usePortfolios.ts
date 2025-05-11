@@ -13,9 +13,9 @@ export function usePortfolios(DEFAULT_SCHEME_CODE: number) {
   const initialParams = React.useMemo(() => getQueryParams(), []);
   const [portfolios, setPortfolios] = React.useState<{ selectedSchemes: (number | null)[]; allocations: number[] }[]>(
     initialParams.portfolios && initialParams.portfolios.length > 0
-      ? initialParams.portfolios.map(schemes => ({
-          selectedSchemes: schemes.length > 0 ? schemes : [DEFAULT_SCHEME_CODE],
-          allocations: schemes.length > 0 ? getDefaultAllocations(schemes.length) : [100],
+      ? initialParams.portfolios.map((p: any) => ({
+          selectedSchemes: p.selectedSchemes && p.selectedSchemes.length > 0 ? p.selectedSchemes : [DEFAULT_SCHEME_CODE],
+          allocations: p.allocations && p.allocations.length > 0 ? p.allocations : [100],
         }))
       : [{ selectedSchemes: [DEFAULT_SCHEME_CODE], allocations: [100] }]
   );
@@ -65,9 +65,9 @@ export function usePortfolios(DEFAULT_SCHEME_CODE: number) {
     }));
   };
 
-  // Sync portfolios and years to query params (only schemes, not allocations)
+  // Sync portfolios and years to query params (schemes and allocations)
   React.useEffect(() => {
-    setQueryParams(portfolios.map(p => p.selectedSchemes), years);
+    setQueryParams(portfolios, years);
   }, [portfolios, years]);
 
   return {
