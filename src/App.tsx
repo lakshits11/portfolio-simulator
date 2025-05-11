@@ -25,6 +25,7 @@ const App: React.FC = () => {
     handleFundSelect,
     handleAddFund,
     handleRemoveFund,
+    handleAllocationChange,
   } = usePortfolios(DEFAULT_SCHEME_CODE);
 
   const { handlePlotAllPortfolios } = usePortfolioPlot({
@@ -43,50 +44,60 @@ const App: React.FC = () => {
         {error && <div style={{ color: 'red' }}>{error}</div>}
         {!loading && !error && funds.length > 0 && (
           <>
-            {portfolios.map((portfolio, pIdx) => (
-              <div
-                key={pIdx}
-                style={{
-                  border: '2px solid #007bff',
-                  borderRadius: 8,
-                  padding: 16,
-                  marginBottom: 20,
-                  background: '#f9f9ff',
-                  position: 'relative',
-                }}
-              >
-                {portfolios.length > 1 && (
-                  <button
-                    onClick={() => setPortfolios(prev => prev.filter((_, i) => i !== pIdx))}
-                    style={{
-                      position: 'absolute',
-                      top: 8,
-                      right: 8,
-                      background: 'transparent',
-                      border: 'none',
-                      fontSize: 22,
-                      color: '#888',
-                      cursor: 'pointer',
-                      lineHeight: 1,
-                      padding: 0,
-                    }}
-                    title={`Remove Portfolio ${pIdx + 1}`}
-                  >
-                    &times;
-                  </button>
-                )}
-                <div style={{ fontWeight: 'bold', marginBottom: 8 }}>Portfolio {pIdx + 1}</div>
-                {/* Only fund controls inside each portfolio */}
-                <FundControls
-                  selectedSchemes={portfolio.selectedSchemes}
-                  funds={funds}
-                  onFundSelect={(idx, code) => handleFundSelect(pIdx, idx, code)}
-                  onAddFund={() => handleAddFund(pIdx)}
-                  onRemoveFund={idx => handleRemoveFund(pIdx, idx)}
-                  disableControls={plotState.loadingNav || plotState.loadingXirr}
-                />
-              </div>
-            ))}
+            {portfolios.map((portfolio, pIdx) => {
+              const allocationSum = (portfolio.allocations || []).reduce((a, b) => a + (Number(b) || 0), 0);
+              return (
+                <div
+                  key={pIdx}
+                  style={{
+                    border: '2px solid #007bff',
+                    borderRadius: 8,
+                    padding: 16,
+                    marginBottom: 20,
+                    background: '#f9f9ff',
+                    position: 'relative',
+                  }}
+                >
+                  {portfolios.length > 1 && (
+                    <button
+                      onClick={() => setPortfolios(prev => prev.filter((_, i) => i !== pIdx))}
+                      style={{
+                        position: 'absolute',
+                        top: 8,
+                        right: 8,
+                        background: 'transparent',
+                        border: 'none',
+                        fontSize: 22,
+                        color: '#888',
+                        cursor: 'pointer',
+                        lineHeight: 1,
+                        padding: 0,
+                      }}
+                      title={`Remove Portfolio ${pIdx + 1}`}
+                    >
+                      &times;
+                    </button>
+                  )}
+                  <div style={{ fontWeight: 'bold', marginBottom: 8 }}>Portfolio {pIdx + 1}</div>
+                  {/* Only fund controls inside each portfolio */}
+                  <FundControls
+                    selectedSchemes={portfolio.selectedSchemes}
+                    allocations={portfolio.allocations}
+                    funds={funds}
+                    onFundSelect={(idx, code) => handleFundSelect(pIdx, idx, code)}
+                    onAddFund={() => handleAddFund(pIdx)}
+                    onRemoveFund={idx => handleRemoveFund(pIdx, idx)}
+                    onAllocationChange={(idx, value) => handleAllocationChange(pIdx, idx, value)}
+                    disableControls={plotState.loadingNav || plotState.loadingXirr}
+                  />
+                  {allocationSum !== 100 && (
+                    <div style={{ position: 'absolute', bottom: 8, right: 16, color: 'red', fontSize: 13 }}>
+                      Allocation should add up to 100%
+                    </div>
+                  )}
+                </div>
+              );
+            })}
             <button
               style={{
                 display: 'block',

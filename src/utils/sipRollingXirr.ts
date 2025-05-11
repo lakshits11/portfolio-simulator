@@ -9,8 +9,8 @@ export interface SipRollingXirrEntry {
   transactions: { fundIdx: number; when: Date; nav: number; units: number; amount: number; type: 'buy' | 'sell' }[];
 }
 
-export function calculateSipRollingXirr(navDataList: NavEntry[][], years: number = 1): SipRollingXirrEntry[] {
-  return calculateSipRollingXirrMultipleFunds(navDataList, years);
+export function calculateSipRollingXirr(navDataList: NavEntry[][], years: number = 1, allocations?: number[]): SipRollingXirrEntry[] {
+  return calculateSipRollingXirrMultipleFunds(navDataList, years, allocations);
 }
 
 function getSipBuyTransactions(sorted: NavEntry[], current: NavEntry, firstDate: Date, months: number = 12, fundIdx: number, amountPerFund: number) {
@@ -45,15 +45,15 @@ function getSipXirrTransactions(buys: { fundIdx: number; when: Date; nav: number
 
 export function calculateSipRollingXirrMultipleFunds(
   navDataList: NavEntry[][],
-  years: number = 1
+  years: number = 1,
+  allocations?: number[]
 ): SipRollingXirrEntry[] {
   if (navDataList.length === 0 || navDataList.some(fund => fund.length < 2)) {
     return [];
   }
   const numFunds = navDataList.length;
+  console.log('XIRR allocations:', allocations, 'numFunds:', numFunds);
   const totalInvestment = 100;
-  const amountPerFund = totalInvestment / numFunds; // Split 100 across all funds
-  // Fill missing dates for each fund
   const filledNavs = navDataList.map(fund => {
     let data = fund;
     if (!areDatesContinuous(data)) {
@@ -61,7 +61,6 @@ export function calculateSipRollingXirrMultipleFunds(
     }
     return data;
   });
-  // Use the first fund's dates as the reference
   const sorted = [...filledNavs[0]].sort((a, b) => a.date.getTime() - b.date.getTime());
   const firstDate = sorted[0].date;
   const months = 12 * years;
@@ -74,6 +73,8 @@ export function calculateSipRollingXirrMultipleFunds(
     // For each fund, calculate SIP buys and units
     for (let f = 0; f < numFunds; f++) {
       const fundNav = filledNavs[f];
+      const alloc = allocations && allocations[f] != null ? allocations[f] : 100 / numFunds;
+      const amountPerFund = totalInvestment * (alloc / 100);
       const { buys, totalUnits: fundUnits, valid: fundValid } = getSipBuyTransactions(fundNav, current, firstDate, months, f, amountPerFund);
       if (!fundValid) {
         valid = false;
