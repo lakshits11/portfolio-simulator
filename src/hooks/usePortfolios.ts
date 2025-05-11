@@ -1,6 +1,13 @@
 import React from 'react';
 import { getQueryParams, setQueryParams } from '../utils/queryParams';
 
+function getDefaultAllocations(n: number): number[] {
+  const base = Math.floor(100 / n);
+  const allocations = Array(n).fill(base);
+  allocations[n - 1] = 100 - base * (n - 1);
+  return allocations;
+}
+
 export function usePortfolios(DEFAULT_SCHEME_CODE: number) {
   // Initialize portfolios and years from query params
   const initialParams = React.useMemo(() => getQueryParams(), []);
@@ -8,7 +15,7 @@ export function usePortfolios(DEFAULT_SCHEME_CODE: number) {
     initialParams.portfolios && initialParams.portfolios.length > 0
       ? initialParams.portfolios.map(schemes => ({
           selectedSchemes: schemes.length > 0 ? schemes : [DEFAULT_SCHEME_CODE],
-          allocations: schemes.length > 0 ? Array(schemes.length).fill(Math.round(100 / schemes.length)) : [100],
+          allocations: schemes.length > 0 ? getDefaultAllocations(schemes.length) : [100],
         }))
       : [{ selectedSchemes: [DEFAULT_SCHEME_CODE], allocations: [100] }]
   );
@@ -34,9 +41,9 @@ export function usePortfolios(DEFAULT_SCHEME_CODE: number) {
     setPortfolios(prev => prev.map((p, i) => {
       if (i !== portfolioIdx) return p;
       const newSchemes = [...p.selectedSchemes, null];
-      // Default: split equally
+      // Default: split using getDefaultAllocations
       const n = newSchemes.length;
-      const newAlloc = Array(n).fill(Math.round(100 / n));
+      const newAlloc = getDefaultAllocations(n);
       return { ...p, selectedSchemes: newSchemes, allocations: newAlloc };
     }));
   };

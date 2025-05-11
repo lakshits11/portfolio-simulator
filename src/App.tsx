@@ -35,6 +35,10 @@ const App: React.FC = () => {
     plotState,
   });
 
+  const anyInvalidAlloc = portfolios.some(
+    p => (p.allocations || []).reduce((a, b) => a + (Number(b) || 0), 0) !== 100
+  );
+
   return (
     <Container>
       <div style={{ position: 'relative' }}>
@@ -163,7 +167,7 @@ const App: React.FC = () => {
                   cursor: 'pointer',
                 }}
                 onClick={handlePlotAllPortfolios}
-                disabled={plotState.loadingNav || plotState.loadingXirr}
+                disabled={plotState.loadingNav || plotState.loadingXirr || anyInvalidAlloc}
               >
                 Plot
               </button>
