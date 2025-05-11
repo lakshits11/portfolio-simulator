@@ -40,19 +40,19 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
     return Array.from(new Set(allDates)).sort();
   };
 
-  const getLumpSumSeries = () => [
-    {
-      name: 'Portfolio Lump Sum XIRR',
-      data: (lumpSumXirrDatas['portfolio'] || []).sort((a, b) => a.date.getTime() - b.date.getTime()).map(row => row.xirr * 100),
-      type: 'line',
-      color: COLORS[0],
-      marker: { enabled: false },
-    }
-  ];
-  const getLumpSumCategories = () => {
-    const arr = lumpSumXirrDatas['portfolio'] || [];
-    return arr.map(row => formatDate(row.date));
-  };
+  // const getLumpSumSeries = () => [
+  //   {
+  //     name: 'Portfolio Lump Sum XIRR',
+  //     data: (lumpSumXirrDatas['portfolio'] || []).sort((a, b) => a.date.getTime() - b.date.getTime()).map(row => row.xirr * 100),
+  //     type: 'line',
+  //     color: COLORS[0],
+  //     marker: { enabled: false },
+  //   }
+  // ];
+  // const getLumpSumCategories = () => {
+  //   const arr = lumpSumXirrDatas['portfolio'] || [];
+  //   return arr.map(row => formatDate(row.date));
+  // };
 
   const getSipSeries = () => [
     {
@@ -70,6 +70,7 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
 
   return (
     <div style={{ marginTop: 32 }}>
+      {/*
       <div style={{ marginTop: 24 }}>
         <HighchartsReact
           highcharts={Highcharts}
@@ -91,6 +92,7 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
           }}
         />
       </div>
+      */}
       <div style={{ marginTop: 24 }}>
         <HighchartsReact
           highcharts={Highcharts}

@@ -101,8 +101,8 @@ const App: React.FC = () => {
       setNavDatas(navs);
 
       // Portfolio XIRR calculation (single series)
-      const lumpSum = calculateLumpSumRollingXirr(filledNavs, years);
-      setLumpSumXirrDatas({ portfolio: lumpSum });
+      // const lumpSum = calculateLumpSumRollingXirr(filledNavs, years);
+      // setLumpSumXirrDatas({ portfolio: lumpSum });
 
       // Portfolio SIP XIRR calculation (single series)
       const sipPortfolio = calculateSipRollingXirr(filledNavs, years);
