@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MutualFundDropdown } from './components/MutualFundDropdown';
 import { Container } from './components/Container';
 import { LoadingSpinner } from './components/LoadingSpinner';
@@ -33,10 +33,13 @@ const App: React.FC = () => {
   const [years, setYears] = useState<number>(initialParams.years || 1);
   const [navDatas, setNavDatas] = useState<Record<number, any[]>>({});
   const [lumpSumXirrDatas, setLumpSumXirrDatas] = useState<Record<string, any[]>>({});
-  const [sipXirrDatas, setSipXirrDatas] = useState<Record<number, any[]>>({});
+  const [sipXirrDatas, setSipXirrDatas] = useState<Record<string, any[]>>({});
   const [hasPlotted, setHasPlotted] = useState(false);
-  const [loadingFunds, setLoadingFunds] = useState(false);
+  const [loadingNav, setLoadingNav] = useState(false);
+  const [loadingXirr, setLoadingXirr] = useState(false);
   const [xirrError, setXirrError] = useState<string | null>(null);
+  const navLoadingStartRef = useRef<number | null>(null);
+  const xirrLoadingStartRef = useRef<number | null>(null);
 
   // Sync state to query string
   useEffect(() => {
@@ -81,7 +84,9 @@ const App: React.FC = () => {
 
   // Plot logic for all selected funds
   const handlePlot = async () => {
-    setLoadingFunds(true);
+    setLoadingNav(true);
+    navLoadingStartRef.current = Date.now();
+    setLoadingXirr(false);
     setHasPlotted(false);
     setNavDatas({});
     setLumpSumXirrDatas({});
@@ -90,6 +95,7 @@ const App: React.FC = () => {
     try {
       const navs: Record<number, any[]> = {};
       const filledNavs: any[][] = [];
+      console.time('NAV Fetching');
       for (const scheme of selectedSchemes) {
         if (!scheme) continue;
         const nav = await loadNavData(scheme);
@@ -98,20 +104,61 @@ const App: React.FC = () => {
         navs[scheme] = filled;
         filledNavs.push(filled);
       }
+      console.timeEnd('NAV Fetching');
       setNavDatas(navs);
-
-      // Portfolio XIRR calculation (single series)
-      // const lumpSum = calculateLumpSumRollingXirr(filledNavs, years);
-      // setLumpSumXirrDatas({ portfolio: lumpSum });
-
-      // Portfolio SIP XIRR calculation (single series)
-      const sipPortfolio = calculateSipRollingXirr(filledNavs, years);
-      setSipXirrDatas({ portfolio: sipPortfolio });
-      setHasPlotted(true);
+      const navElapsed = Date.now() - (navLoadingStartRef.current || 0);
+      const startXirrCalculation = () => {
+        setLoadingXirr(true);
+        xirrLoadingStartRef.current = Date.now();
+        console.time('SIP XIRR Calculation');
+        const worker = new Worker(new URL('./utils/xirrWorker.ts', import.meta.url), { type: 'module' });
+        worker.postMessage({ navDataList: filledNavs, years });
+        worker.onmessage = (event) => {
+          console.timeEnd('SIP XIRR Calculation');
+          setSipXirrDatas({ portfolio: event.data });
+          setHasPlotted(true);
+          const xirrElapsed = Date.now() - (xirrLoadingStartRef.current || 0);
+          if (xirrElapsed < 1500) {
+            setTimeout(() => setLoadingXirr(false), 1500 - xirrElapsed);
+          } else {
+            setLoadingXirr(false);
+          }
+          worker.terminate();
+        };
+        worker.onerror = (err) => {
+          setXirrError('Error calculating XIRR.');
+          const xirrElapsed = Date.now() - (xirrLoadingStartRef.current || 0);
+          if (xirrElapsed < 1500) {
+            setTimeout(() => setLoadingXirr(false), 1500 - xirrElapsed);
+          } else {
+            setLoadingXirr(false);
+          }
+          worker.terminate();
+        };
+      };
+      if (navElapsed < 1500) {
+        setTimeout(() => {
+          setLoadingNav(false);
+          startXirrCalculation();
+        }, 1500 - navElapsed);
+      } else {
+        setLoadingNav(false);
+        startXirrCalculation();
+      }
     } catch (e) {
       setXirrError('Error loading or calculating data.');
-    } finally {
-      setLoadingFunds(false);
+      const navElapsed = Date.now() - (navLoadingStartRef.current || 0);
+      if (navElapsed < 1500) {
+        setTimeout(() => setLoadingNav(false), 1500 - navElapsed);
+      } else {
+        setLoadingNav(false);
+      }
+      const xirrElapsed = Date.now() - (xirrLoadingStartRef.current || 0);
+      if (xirrElapsed < 1500) {
+        setTimeout(() => setLoadingXirr(false), 1500 - xirrElapsed);
+      } else {
+        setLoadingXirr(false);
+      }
     }
   };
 
@@ -163,58 +210,78 @@ const App: React.FC = () => {
 
   return (
     <Container>
-      <h2 style={{ marginBottom: '20px' }}>Mutual Funds</h2>
-      <div style={{ marginBottom: 16 }}>
-        <label htmlFor="years-input">Rolling Period (years): </label>
-        <input
-          id="years-input"
-          type="number"
-          min={1}
-          max={30}
-          value={years}
-          onChange={handleYearsChange}
-          style={{ width: 60, marginLeft: 8 }}
-        />
-        <button
-          style={{ marginLeft: 16, padding: '4px 16px', fontSize: 16 }}
-          onClick={handlePlot}
-          disabled={loading || loadingFunds}
-        >
-          Plot
-        </button>
-      </div>
-      {loading && <LoadingSpinner text="Loading list of mutual funds..." />}
-      {error && <div style={{ color: 'red' }}>{error}</div>}
-      {!loading && !error && funds.length > 0 && (
-        <>
-          {selectedSchemes.map((scheme, idx) => (
-            <div key={idx} style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-              <MutualFundDropdown
-                funds={funds.filter(f => !selectedSchemes.includes(f.schemeCode) || f.schemeCode === scheme)}
-                onSelect={code => handleFundSelect(idx, code)}
-                value={scheme ?? undefined}
-              />
-              {selectedSchemes.length > 1 && (
-                <button style={{ marginLeft: 8 }} onClick={() => handleRemoveFund(idx)}>-</button>
-              )}
-            </div>
-          ))}
-          <button style={{ marginTop: 8 }} onClick={handleAddFund}>Add new fund</button>
-        </>
-      )}
-      {(loadingFunds) && <LoadingSpinner text="Loading NAV data..." />}
-      {xirrError && <div style={{ color: 'red', marginTop: 16 }}>{xirrError}</div>}
-      {hasPlotted && Object.keys(navDatas).length > 0 && (
-        <>
-          <MultiFundCharts
-            navDatas={navDatas}
-            lumpSumXirrDatas={lumpSumXirrDatas}
-            sipXirrDatas={sipXirrDatas}
-            funds={funds}
-            COLORS={COLORS}
+      <div style={{ position: 'relative' }}>
+        {(loadingNav || loadingXirr) && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              zIndex: 10,
+              background: 'rgba(255,255,255,0.2)',
+              pointerEvents: 'all',
+            }}
           />
-        </>
-      )}
+        )}
+        <h2 style={{ marginBottom: '20px' }}>Mutual Funds</h2>
+        <div style={{ marginBottom: 16 }}>
+          <label htmlFor="years-input">Rolling Period (years): </label>
+          <input
+            id="years-input"
+            type="number"
+            min={1}
+            max={30}
+            value={years}
+            onChange={handleYearsChange}
+            style={{ width: 60, marginLeft: 8 }}
+          />
+          <button
+            style={{ marginLeft: 16, padding: '4px 16px', fontSize: 16 }}
+            onClick={handlePlot}
+            disabled={loading || loadingNav || loadingXirr}
+          >
+            Plot
+          </button>
+        </div>
+        {loading && <LoadingSpinner text="Loading list of mutual funds..." />}
+        {error && <div style={{ color: 'red' }}>{error}</div>}
+        {!loading && !error && funds.length > 0 && (
+          <>
+            {selectedSchemes.map((scheme, idx) => (
+              <div key={idx} style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+                <MutualFundDropdown
+                  funds={funds.filter(f => !selectedSchemes.includes(f.schemeCode) || f.schemeCode === scheme)}
+                  onSelect={code => handleFundSelect(idx, code)}
+                  value={scheme ?? undefined}
+                />
+                {selectedSchemes.length > 1 && (
+                  <button style={{ marginLeft: 8 }} onClick={() => handleRemoveFund(idx)}>-</button>
+                )}
+              </div>
+            ))}
+            <button style={{ marginTop: 8 }} onClick={handleAddFund}>Add new fund</button>
+
+            {/* Move spinners here, below dropdowns and above chart */}
+            {loadingNav && <LoadingSpinner text="Loading NAV data..." />}
+            {loadingXirr && <LoadingSpinner text="Calculating XIRR..." />}
+
+            {xirrError && <div style={{ color: 'red', marginTop: 16 }}>{xirrError}</div>}
+            {hasPlotted && Object.keys(navDatas).length > 0 && (
+              <>
+                <MultiFundCharts
+                  navDatas={navDatas}
+                  lumpSumXirrDatas={lumpSumXirrDatas}
+                  sipXirrDatas={sipXirrDatas}
+                  funds={funds}
+                  COLORS={COLORS}
+                />
+              </>
+            )}
+          </>
+        )}
+      </div>
     </Container>
   );
 };
