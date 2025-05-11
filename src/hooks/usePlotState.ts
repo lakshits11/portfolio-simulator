@@ -129,5 +129,7 @@ export function usePlotState(loadNavData: (schemeCode: number) => Promise<any[]>
     setLumpSumXirrDatas,
     setSipXirrDatas,
     setXirrError,
+    setLoadingNav,
+    setLoadingXirr,
   };
 } 

@@ -10,6 +10,7 @@ import { ChartArea } from './components/ChartArea';
 import { usePlotState } from './hooks/usePlotState';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import { getQueryParams, setQueryParams } from './utils/queryParams';
+import { fillMissingNavDates } from './utils/fillMissingNavDates';
 
 const DEFAULT_SCHEME_CODE = 120716;
 
@@ -63,6 +64,70 @@ const App: React.FC = () => {
     setQueryParams(portfolios.map(p => p.selectedSchemes), years);
   }, [portfolios, years]);
 
+  // Handler for plotting all portfolios
+  const handlePlotAllPortfolios = async () => {
+    plotState.setLoadingNav(true);
+    plotState.setLoadingXirr(false);
+    plotState.setHasPlotted(false);
+    plotState.setNavDatas({});
+    plotState.setLumpSumXirrDatas({});
+    plotState.setSipXirrDatas({});
+    plotState.setXirrError(null);
+    try {
+      const allNavDatas: Record<string, any[][]> = {}; // key: portfolio index, value: array of nav arrays
+      const allNavsFlat: Record<string, any[]> = {}; // for navDatas prop
+      for (let pIdx = 0; pIdx < portfolios.length; ++pIdx) {
+        const schemes = portfolios[pIdx].selectedSchemes.filter(Boolean) as number[];
+        const navs: any[][] = [];
+        for (const scheme of schemes) {
+          const nav = await loadNavData(scheme);
+          if (!Array.isArray(nav) || nav.length === 0) continue;
+          const filled = fillMissingNavDates(nav);
+          navs.push(filled);
+          allNavsFlat[`${pIdx}_${scheme}`] = filled;
+        }
+        allNavDatas[pIdx] = navs;
+      }
+      plotState.setNavDatas(allNavsFlat);
+      // Now calculate XIRR for each portfolio using the worker
+      plotState.setLoadingXirr(true);
+      const allSipXirrDatas: Record<string, any[]> = {};
+      let completed = 0;
+      for (let pIdx = 0; pIdx < portfolios.length; ++pIdx) {
+        const navDataList = allNavDatas[pIdx];
+        if (!navDataList || navDataList.length === 0) {
+          allSipXirrDatas[`Portfolio ${pIdx + 1}`] = [];
+          completed++;
+          continue;
+        }
+        await new Promise<void>((resolve) => {
+          const worker = new Worker(new URL('./utils/xirrWorker.ts', import.meta.url));
+          worker.postMessage({ navDataList, years });
+          worker.onmessage = (event: MessageEvent) => {
+            allSipXirrDatas[`Portfolio ${pIdx + 1}`] = event.data;
+            worker.terminate();
+            completed++;
+            resolve();
+          };
+          worker.onerror = (err: ErrorEvent) => {
+            allSipXirrDatas[`Portfolio ${pIdx + 1}`] = [];
+            worker.terminate();
+            completed++;
+            resolve();
+          };
+        });
+      }
+      plotState.setSipXirrDatas(allSipXirrDatas);
+      plotState.setHasPlotted(true);
+      plotState.setLoadingNav(false);
+      plotState.setLoadingXirr(false);
+    } catch (e) {
+      plotState.setXirrError('Error loading or calculating data.');
+      plotState.setLoadingNav(false);
+      plotState.setLoadingXirr(false);
+    }
+  };
+
   return (
     <Container>
       <div style={{ position: 'relative' }}>
@@ -81,8 +146,29 @@ const App: React.FC = () => {
                   padding: 16,
                   marginBottom: 20,
                   background: '#f9f9ff',
+                  position: 'relative',
                 }}
               >
+                {portfolios.length > 1 && (
+                  <button
+                    onClick={() => setPortfolios(prev => prev.filter((_, i) => i !== pIdx))}
+                    style={{
+                      position: 'absolute',
+                      top: 8,
+                      right: 8,
+                      background: 'transparent',
+                      border: 'none',
+                      fontSize: 22,
+                      color: '#888',
+                      cursor: 'pointer',
+                      lineHeight: 1,
+                      padding: 0,
+                    }}
+                    title={`Remove Portfolio ${pIdx + 1}`}
+                  >
+                    &times;
+                  </button>
+                )}
                 <div style={{ fontWeight: 'bold', marginBottom: 8 }}>Portfolio {pIdx + 1}</div>
                 {/* Only fund controls inside each portfolio */}
                 <FundControls
@@ -159,7 +245,7 @@ const App: React.FC = () => {
                   color: '#333',
                   cursor: 'pointer',
                 }}
-                onClick={plotState.handlePlot}
+                onClick={handlePlotAllPortfolios}
                 disabled={plotState.loadingNav || plotState.loadingXirr}
               >
                 Plot

@@ -54,19 +54,33 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
   //   return arr.map(row => formatDate(row.date));
   // };
 
-  const getSipSeries = () => [
-    {
-      name: 'Portfolio SIP XIRR',
-      data: (sipXirrDatas['portfolio'] || []).sort((a, b) => a.date.getTime() - b.date.getTime()).map(row => row.xirr * 100),
-      type: 'line',
-      color: COLORS[0],
-      marker: { enabled: false },
-    }
-  ];
-  const getSipCategories = () => {
-    const arr = sipXirrDatas['portfolio'] || [];
-    return arr.map(row => formatDate(row.date));
+  // Get all unique dates across all portfolios
+  const getAllDates = () => {
+    const allDates = Object.values(sipXirrDatas).flatMap(arr =>
+      Array.isArray(arr) ? arr.map(row => formatDate(row.date)) : []
+    );
+    return Array.from(new Set(allDates)).sort();
   };
+
+  // Build a series for each portfolio
+  const getSipSeries = () => {
+    const allDates = getAllDates();
+    return Object.entries(sipXirrDatas).map(([portfolioName, data], idx) => {
+      // Map date to xirr for this portfolio
+      const dateToXirr: Record<string, number> = {};
+      (data || []).forEach((row: any) => {
+        dateToXirr[formatDate(row.date)] = row.xirr * 100;
+      });
+      return {
+        name: portfolioName,
+        data: allDates.map(date => dateToXirr[date] ?? null),
+        type: 'line',
+        color: COLORS[idx % COLORS.length],
+        marker: { enabled: false },
+      };
+    });
+  };
+  const getSipCategories = () => getAllDates();
 
   return (
     <div style={{ marginTop: 32 }}>
