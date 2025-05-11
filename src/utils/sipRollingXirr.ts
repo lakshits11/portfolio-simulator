@@ -34,7 +34,7 @@ function getSipBuyTransactions(sorted: NavEntry[], current: NavEntry, firstDate:
 }
 
 function getSipSellTransaction(current: NavEntry, totalUnits: number, fundIdx: number): { fundIdx: number; nav: number; when: Date; units: number; amount: number; type: 'sell' } {
-  return { fundIdx, nav: current.nav, when: current.date, units: totalUnits, amount: totalUnits * current.nav, type: 'sell' };
+  return { fundIdx, nav: current.nav, when: current.date, units: totalUnits, amount: totalUnits * current.nav, type: 'sell' as const };
 }
 
 function getSipXirrTransactions(buys: { fundIdx: number; when: Date; nav: number; units: number; amount: number; type: 'buy' }[], sells: { fundIdx: number; nav: number; when: Date; units: number; amount: number; type: 'sell' }[]) {
@@ -51,7 +51,8 @@ export function calculateSipRollingXirrMultipleFunds(
     return [];
   }
   const numFunds = navDataList.length;
-  const amountPerFund = 100; // Each SIP is 100 per fund
+  const totalInvestment = 100;
+  const amountPerFund = totalInvestment / numFunds; // Split 100 across all funds
   // Fill missing dates for each fund
   const filledNavs = navDataList.map(fund => {
     let data = fund;

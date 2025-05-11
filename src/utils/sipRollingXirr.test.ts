@@ -78,6 +78,9 @@ describe('calculateSipRollingXirrMultipleFunds', () => {
       const fund = portfolioFunds[tx.fundIdx];
       expect(fund).toBeDefined();
       expect(['Fund A', 'Fund B']).toContain(fund.schemeName);
+      if (tx.type === 'buy') {
+        expect(tx.amount).toBeCloseTo(50, 5); // Each buy should be 50, not 100
+      }
     });
   });
 }); 
