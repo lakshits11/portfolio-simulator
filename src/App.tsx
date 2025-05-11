@@ -47,7 +47,6 @@ const App: React.FC = () => {
               onPlot={plotState.handlePlot}
               disableControls={plotState.loadingNav || plotState.loadingXirr}
             />
-            <SpinnerArea loadingNav={plotState.loadingNav} loadingXirr={plotState.loadingXirr} />
             <ChartArea
               xirrError={plotState.xirrError}
               hasPlotted={plotState.hasPlotted}
@@ -56,6 +55,8 @@ const App: React.FC = () => {
               sipXirrDatas={plotState.sipXirrDatas}
               funds={funds}
               COLORS={plotState.COLORS}
+              loadingNav={plotState.loadingNav}
+              loadingXirr={plotState.loadingXirr}
             />
           </>
         )}
