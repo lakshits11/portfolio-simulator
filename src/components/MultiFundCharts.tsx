@@ -40,30 +40,32 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
     return Array.from(new Set(allDates)).sort();
   };
 
-  const getLumpSumSeries = () =>
-    Object.entries(lumpSumXirrDatas).map(([scheme, data], idx) => ({
-      name: getFundName(Number(scheme)),
-      data: [...data].sort((a, b) => a.date.getTime() - b.date.getTime()).map(row => row.xirr * 100),
+  const getLumpSumSeries = () => [
+    {
+      name: 'Portfolio Lump Sum XIRR',
+      data: (lumpSumXirrDatas['portfolio'] || []).sort((a, b) => a.date.getTime() - b.date.getTime()).map(row => row.xirr * 100),
       type: 'line',
-      color: COLORS[idx % COLORS.length],
+      color: COLORS[0],
       marker: { enabled: false },
-    }));
+    }
+  ];
   const getLumpSumCategories = () => {
-    const allDates = Object.values(lumpSumXirrDatas).flatMap(arr => Array.isArray(arr) ? arr.map(row => formatDate(row.date)) : []);
-    return Array.from(new Set(allDates)).sort();
+    const arr = lumpSumXirrDatas['portfolio'] || [];
+    return arr.map(row => formatDate(row.date));
   };
 
-  const getSipSeries = () =>
-    Object.entries(sipXirrDatas).map(([scheme, data], idx) => ({
-      name: getFundName(Number(scheme)),
-      data: [...data].sort((a, b) => a.date.getTime() - b.date.getTime()).map(row => row.xirr * 100),
+  const getSipSeries = () => [
+    {
+      name: 'Portfolio SIP XIRR',
+      data: (sipXirrDatas['portfolio'] || []).sort((a, b) => a.date.getTime() - b.date.getTime()).map(row => row.xirr * 100),
       type: 'line',
-      color: COLORS[idx % COLORS.length],
+      color: COLORS[0],
       marker: { enabled: false },
-    }));
+    }
+  ];
   const getSipCategories = () => {
-    const allDates = Object.values(sipXirrDatas).flatMap(arr => Array.isArray(arr) ? arr.map(row => formatDate(row.date)) : []);
-    return Array.from(new Set(allDates)).sort();
+    const arr = sipXirrDatas['portfolio'] || [];
+    return arr.map(row => formatDate(row.date));
   };
 
   return (

@@ -6,7 +6,7 @@ import { useMutualFunds } from './hooks/useMutualFunds';
 import { useNavData } from './hooks/useNavData';
 import { calculateLumpSumRollingXirr } from './utils/lumpSumRollingXirr';
 import { fillMissingNavDates } from './utils/fillMissingNavDates';
-import { calculateSipRollingXirr } from './utils/sipRollingXirr';
+import { calculateSipRollingXirr, calculateSipRollingXirrMultipleFunds } from './utils/sipRollingXirr';
 import { getQueryParams, setQueryParams } from './utils/queryParams';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
@@ -96,15 +96,9 @@ const App: React.FC = () => {
       const lumpSum = calculateLumpSumRollingXirr(filledNavs, years);
       setLumpSumXirrDatas({ portfolio: lumpSum });
 
-      // (SIP logic remains per-fund for now)
-      const sip: Record<number, any[]> = {};
-      for (const scheme of selectedSchemes) {
-        if (!scheme) continue;
-        const nav = navs[scheme];
-        if (!Array.isArray(nav) || nav.length === 0) continue;
-        sip[scheme] = calculateSipRollingXirr(nav, years);
-      }
-      setSipXirrDatas(sip);
+      // Portfolio SIP XIRR calculation (single series)
+      const sipPortfolio = calculateSipRollingXirr(filledNavs, years);
+      setSipXirrDatas({ portfolio: sipPortfolio });
       setHasPlotted(true);
     } catch (e) {
       setXirrError('Error loading or calculating data.');
