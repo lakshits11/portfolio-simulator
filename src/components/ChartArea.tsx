@@ -15,6 +15,7 @@ interface ChartAreaProps {
   loadingXirr?: boolean;
   portfolioSchemes: (number | null)[][];
   portfolios: { selectedSchemes: (number | null)[] }[];
+  years: number;
 }
 
 export const ChartArea: React.FC<ChartAreaProps> = ({
@@ -29,6 +30,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({
   loadingXirr = false,
   portfolioSchemes,
   portfolios,
+  years,
 }) => (
   <>
     {xirrError && <div style={{ color: 'red', marginTop: 16 }}>{xirrError}</div>}
@@ -54,6 +56,7 @@ export const ChartArea: React.FC<ChartAreaProps> = ({
             COLORS={COLORS}
             portfolioSchemes={portfolioSchemes}
             portfolios={portfolios}
+            years={years}
           />
         )
       )}

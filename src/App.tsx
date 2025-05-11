@@ -169,6 +169,7 @@ const App: React.FC = () => {
               loadingXirr={plotState.loadingXirr}
               portfolioSchemes={portfolios.map(p => p.selectedSchemes)}
               portfolios={portfolios}
+              years={years}
             />
           </>
         )}

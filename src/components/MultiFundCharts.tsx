@@ -15,6 +15,7 @@ interface MultiFundChartsProps {
   COLORS: string[];
   portfolioSchemes: (number | null)[][];
   portfolios: { selectedSchemes: (number | null)[] }[];
+  years: number;
 }
 
 interface TransactionModalProps {
@@ -126,6 +127,7 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
   COLORS,
   portfolioSchemes,
   portfolios,
+  years,
 }) => {
   const [modal, setModal] = useState<{
     visible: boolean;
@@ -235,7 +237,7 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
         <HighchartsReact
           highcharts={Highcharts}
           options={{
-            title: { text: 'SIP Rolling 1Y XIRR Over Time' },
+            title: { text: `SIP Rolling ${years}Y XIRR Over Time` },
             xAxis: {
               categories: getSipCategories(),
               title: { text: 'Date' },
