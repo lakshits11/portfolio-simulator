@@ -40,7 +40,7 @@ export function usePortfolios(DEFAULT_SCHEME_CODE: number) {
   const handleAddFund = (portfolioIdx: number) => {
     setPortfolios(prev => prev.map((p, i) => {
       if (i !== portfolioIdx) return p;
-      const newSchemes = [...p.selectedSchemes, null];
+      const newSchemes = [...p.selectedSchemes, DEFAULT_SCHEME_CODE];
       // Default: split using getDefaultAllocations
       const n = newSchemes.length;
       const newAlloc = getDefaultAllocations(n);
@@ -51,7 +51,9 @@ export function usePortfolios(DEFAULT_SCHEME_CODE: number) {
     setPortfolios(prev => prev.map((p, i) => {
       if (i !== portfolioIdx) return p;
       const newSchemes = p.selectedSchemes.filter((_, j) => j !== idx);
-      const newAlloc = p.allocations.filter((_, j) => j !== idx);
+      // Rebalance allocations for remaining funds
+      const n = newSchemes.length;
+      const newAlloc = n > 0 ? getDefaultAllocations(n) : [];
       return { ...p, selectedSchemes: newSchemes, allocations: newAlloc };
     }));
   };
