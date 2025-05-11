@@ -46,6 +46,14 @@ const App: React.FC = () => {
     );
   }, [selectedSchemes, years]);
 
+  // Auto-plot on initial load if funds are loaded and there are selected schemes
+  useEffect(() => {
+    if (!loading && !error && funds.length > 0 && selectedSchemes.filter(Boolean).length > 0 && !hasPlotted) {
+      handlePlot();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, error, funds, selectedSchemes, years]);
+
   // Add new fund dropdown
   const handleAddFund = () => {
     setSelectedSchemes(schemes => [...schemes, null]);
