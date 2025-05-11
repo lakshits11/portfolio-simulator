@@ -1,20 +1,13 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { fillMissingNavDates } from '../utils/fillMissingNavDates';
 import { mfapiMutualFund } from '../types/mfapiMutualFund';
-import { getQueryParams, setQueryParams } from '../utils/queryParams';
 
 export function usePlotState(loadNavData: (schemeCode: number) => Promise<any[]>, funds: mfapiMutualFund[]) {
   const DEFAULT_SCHEME_CODE = 120716;
   const COLORS = ['#007bff', '#28a745', '#ff9800', '#e91e63', '#9c27b0', '#00bcd4', '#795548', '#607d8b'];
 
-  // Initialize from query string
-  const initialParams = getQueryParams();
-  const [selectedSchemes, setSelectedSchemes] = useState<(number | null)[]>(
-    initialParams.schemes && initialParams.schemes.length > 0
-      ? initialParams.schemes
-      : [DEFAULT_SCHEME_CODE]
-  );
-  const [years, setYears] = useState<number>(initialParams.years || 1);
+  const [selectedSchemes, setSelectedSchemes] = useState<(number | null)[]>([DEFAULT_SCHEME_CODE]);
+  const [years, setYears] = useState<number>(1);
   const [navDatas, setNavDatas] = useState<Record<number, any[]>>({});
   const [lumpSumXirrDatas, setLumpSumXirrDatas] = useState<Record<string, any[]>>({});
   const [sipXirrDatas, setSipXirrDatas] = useState<Record<string, any[]>>({});
@@ -24,14 +17,6 @@ export function usePlotState(loadNavData: (schemeCode: number) => Promise<any[]>
   const [xirrError, setXirrError] = useState<string | null>(null);
   const navLoadingStartRef = useRef<number | null>(null);
   const xirrLoadingStartRef = useRef<number | null>(null);
-
-  // Sync state to query string
-  useEffect(() => {
-    setQueryParams(
-      selectedSchemes.filter((x): x is number => typeof x === 'number'),
-      years
-    );
-  }, [selectedSchemes, years]);
 
   const handleAddFund = () => setSelectedSchemes(schemes => [...schemes, null]);
   const handleRemoveFund = (idx: number) => setSelectedSchemes(schemes => schemes.filter((_, i) => i !== idx));
@@ -139,5 +124,10 @@ export function usePlotState(loadNavData: (schemeCode: number) => Promise<any[]>
     handlePlot,
     funds,
     COLORS,
+    setHasPlotted,
+    setNavDatas,
+    setLumpSumXirrDatas,
+    setSipXirrDatas,
+    setXirrError,
   };
 } 
