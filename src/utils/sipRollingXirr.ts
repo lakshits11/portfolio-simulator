@@ -43,20 +43,20 @@ function computeSipXirrForDate(
   firstDate: Date,
   allocations?: number[]
 ): SipRollingXirrEntry[] {
-  const { buys, unitsPerFund } = calculateTransactionsForDate(
+  const { transactions, unitsPerFund } = calculateTransactionsForDate(
     currentDate,
     fundDateMaps,
     months,
     firstDate,
     allocations
   );
-  if (!buys) return [];
+  if (!transactions) return [];
 
   const sells = finalSellingOfAllFunds(currentDate, fundDateMaps, unitsPerFund);
   if (!sells) return [];
 
-  const transactions = [...buys, ...sells];
-  const cashflows = transactions.map(tx => ({
+  const allTransactions = [...transactions, ...sells];
+  const cashflows = allTransactions.map(tx => ({
     amount: tx.type === 'buy' ? -tx.amount : tx.amount,
     when: tx.when
   }));
@@ -64,7 +64,7 @@ function computeSipXirrForDate(
   return [{
     date: currentDate,
     xirr: xirr(cashflows),
-    transactions
+    transactions: allTransactions
   }];
 }
 
@@ -74,29 +74,29 @@ function calculateTransactionsForDate(
   months: number,
   firstDate: Date,
   allocations?: number[]
-): { buys: Transaction[] | null; unitsPerFund: number[] } {
+): { transactions: Transaction[] | null; unitsPerFund: number[] } {
   const totalInvestment = 100;
   const numFunds = fundDateMaps.length;
-  const buys: Transaction[] = [];
+  const transactions: Transaction[] = [];
   const unitsPerFund = new Array(numFunds).fill(0);
 
   for (let m = months; m >= 1; m--) {
     const sipDate = getNthPreviousMonthDate(currentDate, m);
-    if (sipDate < firstDate) return { buys: null, unitsPerFund };
+    if (sipDate < firstDate) return { transactions: null, unitsPerFund };
 
     const dateKey = toDateKey(sipDate);
 
     for (let fundIdx = 0; fundIdx < numFunds; fundIdx++) {
       const navMap = fundDateMaps[fundIdx];
       const entry = navMap.get(dateKey);
-      if (!entry) return { buys: null, unitsPerFund };
+      if (!entry) return { transactions: null, unitsPerFund };
 
       const alloc = allocations?.[fundIdx] ?? (100 / numFunds);
       const amount = totalInvestment * (alloc / 100);
       const units = amount / entry.nav;
 
       unitsPerFund[fundIdx] += units;
-      buys.push({
+      transactions.push({
         fundIdx,
         nav: entry.nav,
         when: entry.date,
@@ -107,7 +107,7 @@ function calculateTransactionsForDate(
     }
   }
 
-  return { buys, unitsPerFund };
+  return { transactions, unitsPerFund };
 }
 
 function finalSellingOfAllFunds(
