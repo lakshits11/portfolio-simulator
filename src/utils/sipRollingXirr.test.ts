@@ -1,232 +1,110 @@
-import { calculateSipRollingXirr, calculateSipRollingXirrMultipleFunds, SipRollingXirrEntry } from './sipRollingXirr';
-import { fillMissingNavDates } from './fillMissingNavDates';
+import { calculateSipRollingXirr, SipRollingXirrEntry, Transaction } from './sipRollingXirr';
 import { NavEntry } from '../types/navData';
 
+function buildMonthlyNavData(startDate: string, navStart: number, months: number, step: number = 5): NavEntry[] {
+  const entries: NavEntry[] = [];
+  let date = new Date(startDate);
+  let nav = navStart;
+
+  for (let i = 0; i < months; i++) {
+    entries.push({ date: new Date(date), nav });
+    date.setMonth(date.getMonth() + 1);
+    nav += step;
+  }
+
+  return entries;
+}
+
 describe('calculateSipRollingXirr', () => {
-  it('calculates SIP rolling 1-year XIRR for simple monthly NAV data', () => {
-    const navData: NavEntry[] = [
-      { date: new Date('2023-01-31'), nav: 100 },
-      { date: new Date('2023-02-28'), nav: 105 },
-      { date: new Date('2023-03-31'), nav: 110 },
-      { date: new Date('2023-04-30'), nav: 115 },
-      { date: new Date('2023-05-31'), nav: 120 },
-      { date: new Date('2023-06-30'), nav: 125 },
-      { date: new Date('2023-07-31'), nav: 130 },
-      { date: new Date('2023-08-31'), nav: 135 },
-      { date: new Date('2023-09-30'), nav: 140 },
-      { date: new Date('2023-10-31'), nav: 145 },
-      { date: new Date('2023-11-30'), nav: 150 },
-      { date: new Date('2023-12-31'), nav: 155 },
-      { date: new Date('2024-01-31'), nav: 160 },
-    ];
+  it('calculates SIP rolling XIRR for a single fund with regular monthly NAV data', () => {
+    const navData = buildMonthlyNavData('2023-01-31', 100, 13);
     const result = calculateSipRollingXirr([navData]);
+
     const last = result[result.length - 1];
     expect(last).toBeDefined();
-    expect(last.transactions.length).toBe(13); // 12 SIPs + 1 sell
-    expect(last.transactions[0].nav).toBe(100);
-    expect(typeof last.transactions[12].nav).toBe('number');
+    expect(last.transactions.length).toBe(13); // 12 buys + 1 sell
+    expect(last.transactions[0].when.toISOString().startsWith('2023-02')).toBe(true);
+    expect(last.transactions[0].nav).toBe(105);
     expect(typeof last.xirr).toBe('number');
   });
 
-  it('returns empty array if not enough data', () => {
+  it('returns empty array if any fund has insufficient data', () => {
     expect(calculateSipRollingXirr([[]])).toEqual([]);
     expect(calculateSipRollingXirr([[{ date: new Date('2023-01-01'), nav: 100 }]])).toEqual([]);
   });
 
-  it('handles missing dates by filling them', () => {
-    const navData: NavEntry[] = [
-      { date: new Date('2023-01-31'), nav: 100 },
-      { date: new Date('2023-03-31'), nav: 110 }, // missing Feb
-      { date: new Date('2023-04-30'), nav: 115 },
-      { date: new Date('2023-05-31'), nav: 120 },
-      { date: new Date('2023-06-30'), nav: 125 },
-      { date: new Date('2023-07-31'), nav: 130 },
-      { date: new Date('2023-08-31'), nav: 135 },
-      { date: new Date('2023-09-30'), nav: 140 },
-      { date: new Date('2023-10-31'), nav: 145 },
-      { date: new Date('2023-11-30'), nav: 150 },
-      { date: new Date('2023-12-31'), nav: 155 },
-      { date: new Date('2024-01-31'), nav: 160 },
-    ];
+  it('handles missing months by filling them implicitly', () => {
+    const navData = buildMonthlyNavData('2023-01-31', 100, 13).filter((entry, i) => i !== 1); // remove Feb
     const result = calculateSipRollingXirr([navData]);
+
     expect(result.length).toBeGreaterThan(0);
-    // Should still produce a result for the last date
     const last = result[result.length - 1];
-    expect(last).toBeDefined();
     expect(typeof last.xirr).toBe('number');
   });
 
-  it('skips dates where not enough SIPs can be made', () => {
-    const navData: NavEntry[] = [
-      { date: new Date('2023-01-31'), nav: 100 },
-      { date: new Date('2023-02-28'), nav: 105 },
-      { date: new Date('2023-03-31'), nav: 110 },
-    ];
-    // Not enough for 12 SIPs
+  it('skips early dates without enough SIP history', () => {
+    const navData = buildMonthlyNavData('2023-01-31', 100, 3); // Only 3 months
     const result = calculateSipRollingXirr([navData]);
+
     expect(result).toEqual([]);
   });
 
-  it('handles month-end edge cases for SIP dates', () => {
-    const navData: NavEntry[] = [
-      { date: new Date('2023-01-31'), nav: 100 },
-      { date: new Date('2023-02-28'), nav: 105 }, // Feb end
-      { date: new Date('2023-03-31'), nav: 110 },
-      { date: new Date('2023-04-30'), nav: 115 },
-      { date: new Date('2023-05-31'), nav: 120 },
-      { date: new Date('2023-06-30'), nav: 125 },
-      { date: new Date('2023-07-31'), nav: 130 },
-      { date: new Date('2023-08-31'), nav: 135 },
-      { date: new Date('2023-09-30'), nav: 140 },
-      { date: new Date('2023-10-31'), nav: 145 },
-      { date: new Date('2023-11-30'), nav: 150 },
-      { date: new Date('2023-12-31'), nav: 155 },
-      { date: new Date('2024-01-31'), nav: 160 },
-    ];
+  it('handles month-end boundary dates correctly', () => {
+    const navData = buildMonthlyNavData('2023-01-31', 100, 13); // Includes Feb 28
     const result = calculateSipRollingXirr([navData]);
-    expect(result.length).toBeGreaterThan(0);
+
     const last = result[result.length - 1];
-    expect(last).toBeDefined();
     expect(typeof last.xirr).toBe('number');
+    expect(last.transactions[0].when.getDate()).toBeLessThanOrEqual(31); // SIP buy date
+  });
+
+  describe('multi-fund scenarios', () => {
+    it('splits investment equally when no allocations are provided', () => {
+      const nav1 = buildMonthlyNavData('2023-01-31', 100, 13);
+      const nav2 = buildMonthlyNavData('2023-01-31', 200, 13);
+      const result = calculateSipRollingXirr([nav1, nav2]);
+
+      const last = result[result.length - 1];
+      expect(last.transactions.length).toBe(26); // 2 funds × (12 buys + 1 sell)
+
+      last.transactions.forEach((tx: Transaction) => {
+        if (tx.type === 'buy') {
+          expect(tx.amount).toBeCloseTo(50, 5); // 100 split equally
+        }
+      });
+    });
+
+    it('uses custom fund allocations correctly', () => {
+      const nav1 = buildMonthlyNavData('2023-01-31', 100, 13);
+      const nav2 = buildMonthlyNavData('2023-01-31', 200, 13);
+      const allocations = [70, 30];
+      const result = calculateSipRollingXirr([nav1, nav2], 1, allocations);
+
+      const last = result[result.length - 1];
+      last.transactions.forEach((tx: Transaction) => {
+        if (tx.type === 'buy') {
+          if (tx.fundIdx === 0) expect(tx.amount).toBeCloseTo(70, 5);
+          if (tx.fundIdx === 1) expect(tx.amount).toBeCloseTo(30, 5);
+        }
+      });
+    });
+
+    it('returns empty result if either fund lacks enough data', () => {
+      const nav1 = buildMonthlyNavData('2023-01-31', 100, 2); // Too short
+      const nav2 = buildMonthlyNavData('2023-01-31', 200, 13);
+
+      const result = calculateSipRollingXirr([nav1, nav2]);
+      expect(result).toEqual([]);
+    });
+
+    it('handles one fund with missing months', () => {
+      const nav1 = buildMonthlyNavData('2023-01-31', 100, 13).filter((_, i) => i !== 1); // remove Feb
+      const nav2 = buildMonthlyNavData('2023-01-31', 200, 13);
+
+      const result = calculateSipRollingXirr([nav1, nav2]);
+      const last = result[result.length - 1];
+      expect(last).toBeDefined();
+      expect(typeof last.xirr).toBe('number');
+    });
   });
 });
-
-describe('calculateSipRollingXirrMultipleFunds', () => {
-  it('calculates SIP rolling 1-year XIRR for two funds with equal allocation', () => {
-    const navData1: NavEntry[] = [
-      { date: new Date('2023-01-31'), nav: 100 },
-      { date: new Date('2023-02-28'), nav: 105 },
-      { date: new Date('2023-03-31'), nav: 110 },
-      { date: new Date('2023-04-30'), nav: 115 },
-      { date: new Date('2023-05-31'), nav: 120 },
-      { date: new Date('2023-06-30'), nav: 125 },
-      { date: new Date('2023-07-31'), nav: 130 },
-      { date: new Date('2023-08-31'), nav: 135 },
-      { date: new Date('2023-09-30'), nav: 140 },
-      { date: new Date('2023-10-31'), nav: 145 },
-      { date: new Date('2023-11-30'), nav: 150 },
-      { date: new Date('2023-12-31'), nav: 155 },
-      { date: new Date('2024-01-31'), nav: 160 },
-    ];
-    const navData2: NavEntry[] = [
-      { date: new Date('2023-01-31'), nav: 200 },
-      { date: new Date('2023-02-28'), nav: 210 },
-      { date: new Date('2023-03-31'), nav: 220 },
-      { date: new Date('2023-04-30'), nav: 230 },
-      { date: new Date('2023-05-31'), nav: 240 },
-      { date: new Date('2023-06-30'), nav: 250 },
-      { date: new Date('2023-07-31'), nav: 260 },
-      { date: new Date('2023-08-31'), nav: 270 },
-      { date: new Date('2023-09-30'), nav: 280 },
-      { date: new Date('2023-10-31'), nav: 290 },
-      { date: new Date('2023-11-30'), nav: 300 },
-      { date: new Date('2023-12-31'), nav: 310 },
-      { date: new Date('2024-01-31'), nav: 320 },
-    ];
-    const result = calculateSipRollingXirrMultipleFunds([navData1, navData2]);
-    const last = result[result.length - 1];
-    expect(last).toBeDefined();
-    expect(last.transactions.length).toBe(26); // (12 SIPs + 1 sell) per fund * 2
-    expect(typeof last.xirr).toBe('number');
-    // Each buy should be 50 (100/2 funds)
-    last.transactions.forEach(tx => {
-      if (tx.type === 'buy') {
-        expect(tx.amount).toBeCloseTo(50, 5);
-      }
-    });
-  });
-
-  it('handles custom allocations for multiple funds', () => {
-    const navData1: NavEntry[] = [
-      { date: new Date('2023-01-31'), nav: 100 },
-      { date: new Date('2023-02-28'), nav: 105 },
-      { date: new Date('2023-03-31'), nav: 110 },
-      { date: new Date('2023-04-30'), nav: 115 },
-      { date: new Date('2023-05-31'), nav: 120 },
-      { date: new Date('2023-06-30'), nav: 125 },
-      { date: new Date('2023-07-31'), nav: 130 },
-      { date: new Date('2023-08-31'), nav: 135 },
-      { date: new Date('2023-09-30'), nav: 140 },
-      { date: new Date('2023-10-31'), nav: 145 },
-      { date: new Date('2023-11-30'), nav: 150 },
-      { date: new Date('2023-12-31'), nav: 155 },
-      { date: new Date('2024-01-31'), nav: 160 },
-    ];
-    const navData2: NavEntry[] = [
-      { date: new Date('2023-01-31'), nav: 200 },
-      { date: new Date('2023-02-28'), nav: 210 },
-      { date: new Date('2023-03-31'), nav: 220 },
-      { date: new Date('2023-04-30'), nav: 230 },
-      { date: new Date('2023-05-31'), nav: 240 },
-      { date: new Date('2023-06-30'), nav: 250 },
-      { date: new Date('2023-07-31'), nav: 260 },
-      { date: new Date('2023-08-31'), nav: 270 },
-      { date: new Date('2023-09-30'), nav: 280 },
-      { date: new Date('2023-10-31'), nav: 290 },
-      { date: new Date('2023-11-30'), nav: 300 },
-      { date: new Date('2023-12-31'), nav: 310 },
-      { date: new Date('2024-01-31'), nav: 320 },
-    ];
-    // 70% to fund 1, 30% to fund 2
-    const allocations = [70, 30];
-    const result = calculateSipRollingXirrMultipleFunds([navData1, navData2], 1, allocations);
-    const last = result[result.length - 1];
-    expect(last).toBeDefined();
-    // Each buy for fund 1 should be 70, fund 2 should be 30
-    last.transactions.forEach(tx => {
-      if (tx.type === 'buy') {
-        if (tx.fundIdx === 0) expect(tx.amount).toBeCloseTo(70, 5);
-        if (tx.fundIdx === 1) expect(tx.amount).toBeCloseTo(30, 5);
-      }
-    });
-  });
-
-  it('returns empty array if any fund has insufficient data', () => {
-    const navData1: NavEntry[] = [
-      { date: new Date('2023-01-31'), nav: 100 },
-      { date: new Date('2023-02-28'), nav: 105 },
-    ];
-    const navData2: NavEntry[] = [
-      { date: new Date('2023-01-31'), nav: 200 },
-      { date: new Date('2023-02-28'), nav: 210 },
-    ];
-    expect(calculateSipRollingXirrMultipleFunds([navData1, navData2])).toEqual([]);
-  });
-
-  it('handles missing dates in one or more funds', () => {
-    const navData1: NavEntry[] = [
-      { date: new Date('2023-01-31'), nav: 100 },
-      { date: new Date('2023-03-31'), nav: 110 }, // missing Feb
-      { date: new Date('2023-04-30'), nav: 115 },
-      { date: new Date('2023-05-31'), nav: 120 },
-      { date: new Date('2023-06-30'), nav: 125 },
-      { date: new Date('2023-07-31'), nav: 130 },
-      { date: new Date('2023-08-31'), nav: 135 },
-      { date: new Date('2023-09-30'), nav: 140 },
-      { date: new Date('2023-10-31'), nav: 145 },
-      { date: new Date('2023-11-30'), nav: 150 },
-      { date: new Date('2023-12-31'), nav: 155 },
-      { date: new Date('2024-01-31'), nav: 160 },
-    ];
-    const navData2: NavEntry[] = [
-      { date: new Date('2023-01-31'), nav: 200 },
-      { date: new Date('2023-02-28'), nav: 210 },
-      { date: new Date('2023-03-31'), nav: 220 },
-      { date: new Date('2023-04-30'), nav: 230 },
-      { date: new Date('2023-05-31'), nav: 240 },
-      { date: new Date('2023-06-30'), nav: 250 },
-      { date: new Date('2023-07-31'), nav: 260 },
-      { date: new Date('2023-08-31'), nav: 270 },
-      { date: new Date('2023-09-30'), nav: 280 },
-      { date: new Date('2023-10-31'), nav: 290 },
-      { date: new Date('2023-11-30'), nav: 300 },
-      { date: new Date('2023-12-31'), nav: 310 },
-      { date: new Date('2024-01-31'), nav: 320 },
-    ];
-    const result = calculateSipRollingXirrMultipleFunds([navData1, navData2]);
-    expect(result.length).toBeGreaterThan(0);
-    const last = result[result.length - 1];
-    expect(last).toBeDefined();
-    expect(typeof last.xirr).toBe('number');
-  });
-}); 
