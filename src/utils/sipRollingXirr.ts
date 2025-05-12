@@ -16,6 +16,8 @@ export interface Transaction {
   units: number;
   amount: number;
   type: 'buy' | 'sell';
+  cumulativeUnits: number;
+  currentValue: number;
 }
 
 export function calculateSipRollingXirr(
@@ -79,6 +81,7 @@ function calculateTransactionsForDate(
   const numFunds = fundDateMaps.length;
   const transactions: Transaction[] = [];
   const unitsPerFund = new Array(numFunds).fill(0);
+  const cumulativeUnits = new Array(numFunds).fill(0);
 
   for (let m = months; m >= 1; m--) {
     const sipDate = getNthPreviousMonthDate(currentDate, m);
@@ -95,6 +98,7 @@ function calculateTransactionsForDate(
       const amount = totalInvestment * (alloc / 100);
       const units = amount / entry.nav;
 
+      cumulativeUnits[fundIdx] += units;
       unitsPerFund[fundIdx] += units;
       transactions.push({
         fundIdx,
@@ -102,7 +106,9 @@ function calculateTransactionsForDate(
         when: entry.date,
         units,
         amount,
-        type: 'buy'
+        type: 'buy',
+        cumulativeUnits: cumulativeUnits[fundIdx],
+        currentValue: cumulativeUnits[fundIdx] * entry.nav,
       });
     }
   }
@@ -133,7 +139,9 @@ function finalSellingOfAllFunds(
       when: entry.date,
       units,
       amount,
-      type: 'sell'
+      type: 'sell',
+      cumulativeUnits: units, // All units are sold
+      currentValue: units * entry.nav,
     });
   }
 
