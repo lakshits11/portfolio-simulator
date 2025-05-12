@@ -26,6 +26,9 @@ describe('calculateSipRollingXirr', () => {
     expect(last.transactions[0].when.toISOString().startsWith('2023-02')).toBe(true);
     expect(last.transactions[0].nav).toBe(105);
     expect(typeof last.xirr).toBe('number');
+    // Log the XIRR value before asserting
+    console.log('Produced XIRR (single fund, regular monthly NAV):', last.xirr);
+    expect(last.xirr).toBeCloseTo(0.53367382, 8);
   });
 
   it('returns empty array if any fund has insufficient data', () => {
@@ -40,6 +43,9 @@ describe('calculateSipRollingXirr', () => {
     expect(result.length).toBeGreaterThan(0);
     const last = result[result.length - 1];
     expect(typeof last.xirr).toBe('number');
+    // Log the XIRR value before asserting
+    console.log('Produced XIRR (missing months):', last.xirr);
+    expect(last.xirr).toBeCloseTo(0.50976966, 8);
   });
 
   it('skips early dates without enough SIP history', () => {
@@ -56,6 +62,9 @@ describe('calculateSipRollingXirr', () => {
     const last = result[result.length - 1];
     expect(typeof last.xirr).toBe('number');
     expect(last.transactions[0].when.getDate()).toBeLessThanOrEqual(31); // SIP buy date
+    // Log the XIRR value before asserting
+    console.log('Produced XIRR (month-end boundary):', last.xirr);
+    expect(last.xirr).toBeCloseTo(0.53367382, 8);
   });
 
   describe('multi-fund scenarios', () => {
@@ -72,6 +81,9 @@ describe('calculateSipRollingXirr', () => {
           expect(tx.amount).toBeCloseTo(50, 5); // 100 split equally
         }
       });
+      // Log the XIRR value before asserting
+      console.log('Produced XIRR (multi-fund, equal split):', last.xirr);
+      expect(last.xirr).toBeCloseTo(0.40504702, 8);
     });
 
     it('uses custom fund allocations correctly', () => {
@@ -87,6 +99,9 @@ describe('calculateSipRollingXirr', () => {
           if (tx.fundIdx === 1) expect(tx.amount).toBeCloseTo(30, 5);
         }
       });
+      // Log the XIRR value before asserting
+      console.log('Produced XIRR (multi-fund, custom allocation):', last.xirr);
+      expect(last.xirr).toBeCloseTo(0.45611864, 8);
     });
 
     it('returns empty result if either fund lacks enough data', () => {
@@ -105,6 +120,9 @@ describe('calculateSipRollingXirr', () => {
       const last = result[result.length - 1];
       expect(last).toBeDefined();
       expect(typeof last.xirr).toBe('number');
+      // Log the XIRR value before asserting
+      console.log('Produced XIRR (multi-fund, one fund missing months):', last.xirr);
+      expect(last.xirr).toBeCloseTo(0.39337281, 8);
     });
   });
 });
