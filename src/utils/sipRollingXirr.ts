@@ -43,7 +43,7 @@ function computeSipXirrForDate(
   firstDate: Date,
   allocations?: number[]
 ): SipRollingXirrEntry[] {
-  const { buys, unitsPerFund } = collectBuysForDate(
+  const { buys, unitsPerFund } = calculateTransactionsForDate(
     currentDate,
     fundDateMaps,
     months,
@@ -52,7 +52,7 @@ function computeSipXirrForDate(
   );
   if (!buys) return [];
 
-  const sells = collectSellsForDate(currentDate, fundDateMaps, unitsPerFund);
+  const sells = finalSellingOfAllFunds(currentDate, fundDateMaps, unitsPerFund);
   if (!sells) return [];
 
   const transactions = [...buys, ...sells];
@@ -68,7 +68,7 @@ function computeSipXirrForDate(
   }];
 }
 
-function collectBuysForDate(
+function calculateTransactionsForDate(
   currentDate: Date,
   fundDateMaps: Map<string, NavEntry>[],
   months: number,
@@ -110,7 +110,7 @@ function collectBuysForDate(
   return { buys, unitsPerFund };
 }
 
-function collectSellsForDate(
+function finalSellingOfAllFunds(
   currentDate: Date,
   fundDateMaps: Map<string, NavEntry>[],
   unitsPerFund: number[]
@@ -139,7 +139,6 @@ function collectSellsForDate(
 
   return sells;
 }
-
 
 // ────────────── Internal Helpers ────────────── //
 
