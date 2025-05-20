@@ -18,6 +18,7 @@ export interface Transaction {
   type: 'buy' | 'sell';
   cumulativeUnits: number;
   currentValue: number;
+  allocationPercentage?: number;
 }
 
 export function calculateSipRollingXirr(
@@ -88,6 +89,8 @@ function calculateTransactionsForDate(
     if (sipDate < firstDate) return { transactions: null, unitsPerFund };
 
     const dateKey = toDateKey(sipDate);
+    const transactionsForCurrentSipDate: Transaction[] = [];
+    let totalPortfolioValueForSipDate = 0;
 
     for (let fundIdx = 0; fundIdx < numFunds; fundIdx++) {
       const navMap = fundDateMaps[fundIdx];
@@ -100,7 +103,9 @@ function calculateTransactionsForDate(
 
       cumulativeUnits[fundIdx] += units;
       unitsPerFund[fundIdx] += units;
-      transactions.push({
+      const currentFundValue = cumulativeUnits[fundIdx] * entry.nav;
+      
+      const transaction: Transaction = {
         fundIdx,
         nav: entry.nav,
         when: entry.date,
@@ -108,8 +113,20 @@ function calculateTransactionsForDate(
         amount,
         type: 'buy',
         cumulativeUnits: cumulativeUnits[fundIdx],
-        currentValue: cumulativeUnits[fundIdx] * entry.nav,
-      });
+        currentValue: currentFundValue,
+      };
+      transactionsForCurrentSipDate.push(transaction);
+      totalPortfolioValueForSipDate += currentFundValue;
+    }
+
+    // Calculate allocation percentage for transactions on this SIP date
+    for (const tx of transactionsForCurrentSipDate) {
+      if (totalPortfolioValueForSipDate > 0) {
+        tx.allocationPercentage = (tx.currentValue / totalPortfolioValueForSipDate) * 100;
+      } else {
+        tx.allocationPercentage = 0; // Avoid division by zero if total value is 0
+      }
+      transactions.push(tx); // Add to the main transactions list
     }
   }
 

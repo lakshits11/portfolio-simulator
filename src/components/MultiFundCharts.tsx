@@ -10,7 +10,7 @@ function formatDate(date: Date): string {
 interface MultiFundChartsProps {
   navDatas: Record<number, any[]>;
   lumpSumXirrDatas: Record<number, any[]>;
-  sipXirrDatas: Record<number, any[]>;
+  sipXirrDatas: Record<string, any[]>;
   funds: mfapiMutualFund[];
   COLORS: string[];
   portfolioSchemes: (number | null)[][];
@@ -21,7 +21,7 @@ interface MultiFundChartsProps {
 interface TransactionModalProps {
   visible: boolean;
   onClose: () => void;
-  transactions: { fundIdx: number; nav: number; when: Date; units: number; amount: number; type: 'buy' | 'sell' }[];
+  transactions: { fundIdx: number; nav: number; when: Date; units: number; amount: number; type: 'buy' | 'sell'; allocationPercentage?: number }[];
   date: string;
   xirr: number;
   portfolioName: string;
@@ -95,6 +95,7 @@ const TransactionModal: React.FC<TransactionModalProps & { funds: any[] }> = ({ 
               <th style={{ textAlign: 'left', padding: '6px 8px', border: '1px solid #ccc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>NAV</th>
               <th style={{ textAlign: 'left', padding: '6px 8px', border: '1px solid #ccc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Units</th>
               <th style={{ textAlign: 'left', padding: '6px 8px', border: '1px solid #ccc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Amount</th>
+              <th style={{ textAlign: 'left', padding: '6px 8px', border: '1px solid #ccc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Allocation %</th>
             </tr>
           </thead>
           <tbody>
@@ -108,6 +109,9 @@ const TransactionModal: React.FC<TransactionModalProps & { funds: any[] }> = ({ 
                   <td style={{ padding: '6px 8px', border: '1px solid #ccc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{tx.nav.toFixed(2)}</td>
                   <td style={{ padding: '6px 8px', border: '1px solid #ccc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{tx.units.toFixed(4)}</td>
                   <td style={{ padding: '6px 8px', border: '1px solid #ccc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{tx.amount.toFixed(2)}</td>
+                  <td style={{ padding: '6px 8px', border: '1px solid #ccc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {tx.type === 'buy' && tx.allocationPercentage !== undefined ? `${tx.allocationPercentage.toFixed(2)}%` : ''}
+                  </td>
                 </tr>
               );
             })}
@@ -131,7 +135,7 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
 }) => {
   const [modal, setModal] = useState<{
     visible: boolean;
-    transactions: { fundIdx: number; nav: number; when: Date; units: number; amount: number; type: 'buy' | 'sell' }[];
+    transactions: { fundIdx: number; nav: number; when: Date; units: number; amount: number; type: 'buy' | 'sell'; allocationPercentage?: number }[];
     date: string;
     xirr: number;
     portfolioName: string;
@@ -258,11 +262,11 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
                 cursor: 'pointer',
                 point: {
                   events: {
-                    click: function (event: any) {
+                    click: function (this: Highcharts.Point, event: Highcharts.PointClickEventObject) {
                       // Find the portfolio and date for this point
                       const series = this.series;
                       const portfolioName = series.name;
-                      const pointDate = this.category;
+                      const pointDate = this.category as string; // category can be number | string | undefined
                       // Find the XIRR entry for this portfolio and date
                       const xirrEntry = (sipXirrDatas[portfolioName] || []).find((row: any) => formatDate(row.date) === pointDate);
                       if (xirrEntry) {
