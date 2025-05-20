@@ -13,6 +13,8 @@ interface FundControlsProps {
   disableControls: boolean;
   rebalancingEnabled: boolean;
   onToggleRebalancing: () => void;
+  rebalancingThreshold: number;
+  onRebalancingThresholdChange: (value: number) => void;
 }
 
 export const FundControls: React.FC<FundControlsProps> = ({
@@ -26,6 +28,8 @@ export const FundControls: React.FC<FundControlsProps> = ({
   disableControls,
   rebalancingEnabled,
   onToggleRebalancing,
+  rebalancingThreshold,
+  onRebalancingThresholdChange,
 }) => (
   <>
     {selectedSchemes.map((scheme, idx) => (
@@ -62,6 +66,21 @@ export const FundControls: React.FC<FundControlsProps> = ({
         />
         Enable Rebalancing
       </label>
+      {rebalancingEnabled && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <label htmlFor="rebal-threshold-input" style={{ fontSize: 14 }}>Threshold (%):</label>
+          <input
+            id="rebal-threshold-input"
+            type="number"
+            min={0}
+            max={100}
+            value={rebalancingThreshold}
+            onChange={e => onRebalancingThresholdChange(Number(e.target.value))}
+            disabled={disableControls}
+            style={{ width: 50, padding: '2px 4px' }}
+          />
+        </div>
+      )}
     </div>
   </>
 ); 

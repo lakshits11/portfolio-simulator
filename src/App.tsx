@@ -27,6 +27,7 @@ const App: React.FC = () => {
     handleRemoveFund,
     handleAllocationChange,
     handleToggleRebalancing,
+    handleRebalancingThresholdChange,
   } = usePortfolios(DEFAULT_SCHEME_CODE);
 
   const { handlePlotAllPortfolios } = usePortfolioPlot({
@@ -96,6 +97,8 @@ const App: React.FC = () => {
                     disableControls={plotState.loadingNav || plotState.loadingXirr}
                     rebalancingEnabled={portfolio.rebalancingEnabled}
                     onToggleRebalancing={() => handleToggleRebalancing(pIdx)}
+                    rebalancingThreshold={portfolio.rebalancingThreshold}
+                    onRebalancingThresholdChange={value => handleRebalancingThresholdChange(pIdx, value)}
                   />
                   {allocationSum !== 100 && (
                     <div style={{ position: 'absolute', bottom: 8, right: 16, color: 'red', fontSize: 13 }}>

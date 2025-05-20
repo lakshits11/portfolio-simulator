@@ -40,6 +40,7 @@ export function usePortfolioPlot({
         const navDataList = allNavDatas[pIdx];
         const allocations = portfolios[pIdx].allocations;
         const rebalancingEnabled = portfolios[pIdx].rebalancingEnabled;
+        const rebalancingThreshold = portfolios[pIdx].rebalancingThreshold;
         if (!navDataList || navDataList.length === 0) {
           allSipXirrDatas[`Portfolio ${pIdx + 1}`] = [];
           completed++;
@@ -47,7 +48,7 @@ export function usePortfolioPlot({
         }
         await new Promise<void>((resolve) => {
           const worker = new Worker(new URL('../utils/xirrWorker.ts', import.meta.url));
-          worker.postMessage({ navDataList, years, allocations, rebalancingEnabled });
+          worker.postMessage({ navDataList, years, allocations, rebalancingEnabled, rebalancingThreshold });
           worker.onmessage = (event: MessageEvent) => {
             allSipXirrDatas[`Portfolio ${pIdx + 1}`] = event.data;
             worker.terminate();

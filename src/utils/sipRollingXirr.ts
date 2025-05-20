@@ -25,7 +25,8 @@ export function calculateSipRollingXirr(
   navDataList: NavEntry[][],
   years: number = 1,
   allocations: number[],
-  rebalancingEnabled: boolean = false
+  rebalancingEnabled: boolean = false,
+  rebalancingThreshold: number = 5
 ): SipRollingXirrEntry[] {
   if (!isValidInput(navDataList)) return [];
 
@@ -36,7 +37,7 @@ export function calculateSipRollingXirr(
   const firstDate = baseDates[0];
 
   return baseDates.flatMap(date =>
-    computeSipXirrForDate(date, fundDateMaps, months, firstDate, allocations, rebalancingEnabled)
+    computeSipXirrForDate(date, fundDateMaps, months, firstDate, allocations, rebalancingEnabled, rebalancingThreshold)
   );
 }
 
@@ -46,7 +47,8 @@ function computeSipXirrForDate(
   months: number,
   firstDate: Date,
   allocations: number[],
-  rebalancingEnabled: boolean
+  rebalancingEnabled: boolean,
+  rebalancingThreshold: number
 ): SipRollingXirrEntry[] {
   const { transactions, unitsPerFund } = calculateTransactionsForDate(
     currentDate,
@@ -54,7 +56,8 @@ function computeSipXirrForDate(
     months,
     firstDate,
     allocations,
-    rebalancingEnabled
+    rebalancingEnabled,
+    rebalancingThreshold
   );
   if (!transactions) return [];
 
@@ -97,7 +100,8 @@ function calculateTransactionsForDate(
   months: number,
   firstDate: Date,
   allocations: number[],
-  rebalancingEnabled: boolean
+  rebalancingEnabled: boolean,
+  rebalancingThreshold: number
 ): { transactions: Transaction[] | null; unitsPerFund: number[] } {
   const totalInvestment = 100;
   const numFunds = fundDateMaps.length;
@@ -162,7 +166,7 @@ function calculateTransactionsForDate(
       for (let fundIdx = 0; fundIdx < numFunds; fundIdx++) {
         const currentAllocation = (currentFundValuesAfterSip[fundIdx] / totalPortfolioValueAfterSip) * 100;
         const targetAllocation = allocations[fundIdx];
-        if (Math.abs(currentAllocation - targetAllocation) > 5) {
+        if (Math.abs(currentAllocation - targetAllocation) > rebalancingThreshold) {
           needsRebalancing = true;
           break;
         }

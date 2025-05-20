@@ -3,13 +3,16 @@ export function getQueryParams() {
   const params = new URLSearchParams(window.location.search);
   const portfoliosParam = params.get('portfolios');
   const years = params.get('years');
+  const defaultThreshold = 5; // Default threshold if not in query params
+
   return {
     portfolios: portfoliosParam
       ? portfoliosParam.split(';').map(p_str => {
-          // Each p_str: scheme1:alloc1,scheme2:alloc2,...#rebalFlag
+          // Each p_str: scheme1:alloc1,scheme2:alloc2,...#rebalFlag#rebalThreshold
           const parts = p_str.split('#');
           const fundsStr = parts[0];
-          const rebalStr = parts[1]; // Could be undefined if '#' is not present
+          const rebalFlagStr = parts[1]; 
+          const rebalThresholdStr = parts[2];
 
           const schemes: (number | null)[] = [];
           const allocations: number[] = [];
@@ -25,20 +28,27 @@ export function getQueryParams() {
             });
           }
           // Default rebalancingEnabled to false if not present or not '1'
-          const rebalancingEnabled = rebalStr === '1';
-          return { selectedSchemes: schemes, allocations, rebalancingEnabled };
+          const rebalancingEnabled = rebalFlagStr === '1';
+          const rebalancingThreshold = rebalThresholdStr ? parseInt(rebalThresholdStr, 10) : defaultThreshold;
+          
+          return {
+            selectedSchemes: schemes,
+            allocations,
+            rebalancingEnabled,
+            rebalancingThreshold: isNaN(rebalancingThreshold) ? defaultThreshold : rebalancingThreshold
+          };
         }).filter(p => p.selectedSchemes.length > 0 || p.allocations.length > 0) // Filter out potentially empty portfolios from bad params
       : [],
     years: years ? Number(years) : null,
   };
 }
 
-export function setQueryParams(portfolios: { selectedSchemes: (number | null)[]; allocations: number[]; rebalancingEnabled: boolean }[], years: number) {
+export function setQueryParams(portfolios: { selectedSchemes: (number | null)[]; allocations: number[]; rebalancingEnabled: boolean; rebalancingThreshold: number }[], years: number) {
   const params = new URLSearchParams(window.location.search);
   const portfoliosStr = portfolios
     .map(p => {
       const fundsStr = p.selectedSchemes.map((scheme, idx) => `${scheme === null ? '' : scheme}:${p.allocations[idx]}`).join(',');
-      return `${fundsStr}#${p.rebalancingEnabled ? '1' : '0'}`;
+      return `${fundsStr}#${p.rebalancingEnabled ? '1' : '0'}#${p.rebalancingThreshold}`;
     })
     .join(';');
   params.set('portfolios', portfoliosStr);
