@@ -50,6 +50,11 @@ const TransactionModal: React.FC<TransactionModalProps & { funds: any[] }> = ({ 
 
   // Sort transactions by date, then by type (buy, rebalance, sell), then by fund name
   const typeOrder = { buy: 0, rebalance: 1, sell: 2 };
+  const transactionTypeDisplay = {
+    buy: 'Buy',
+    sell: 'Sell',
+    rebalance: 'Rebalance'
+  };
   const sortedTxs = [...transactions].sort((a, b) => {
     const dateA = a.when.getTime();
     const dateB = b.when.getTime();
@@ -111,14 +116,14 @@ const TransactionModal: React.FC<TransactionModalProps & { funds: any[] }> = ({ 
                 <tr key={idx} style={{ background: idx % 2 === 0 ? '#fff' : '#f9f9f9' }}>
                   <td style={{ padding: '6px 8px', border: '1px solid #ccc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{fundName}</td>
                   <td style={{ padding: '6px 8px', border: '1px solid #ccc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {tx.type === 'buy' ? 'Buy' : tx.type === 'sell' ? 'Sell' : 'Rebalance'}
+                    {transactionTypeDisplay[tx.type] || ''}
                   </td>
                   <td style={{ padding: '6px 8px', border: '1px solid #ccc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{formatDate(tx.when)}</td>
                   <td style={{ padding: '6px 8px', border: '1px solid #ccc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{tx.nav.toFixed(2)}</td>
                   <td style={{ padding: '6px 8px', border: '1px solid #ccc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{tx.units.toFixed(4)}</td>
                   <td style={{ padding: '6px 8px', border: '1px solid #ccc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{tx.amount.toFixed(2)}</td>
                   <td style={{ padding: '6px 8px', border: '1px solid #ccc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {tx.type === 'buy' && tx.allocationPercentage !== undefined ? `${tx.allocationPercentage.toFixed(2)}%` : ''}
+                    {(tx.type === 'buy' || tx.type === 'rebalance') && tx.allocationPercentage !== undefined ? `${tx.allocationPercentage.toFixed(2)}%` : ''}
                   </td>
                 </tr>
               );
