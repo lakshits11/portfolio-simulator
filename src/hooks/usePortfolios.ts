@@ -11,13 +11,16 @@ function getDefaultAllocations(n: number): number[] {
 export function usePortfolios(DEFAULT_SCHEME_CODE: number) {
   // Initialize portfolios and years from query params
   const initialParams = React.useMemo(() => getQueryParams(), []);
-  const [portfolios, setPortfolios] = React.useState<{ selectedSchemes: (number | null)[]; allocations: number[] }[]>(
+  const [portfolios, setPortfolios] = React.useState<
+    { selectedSchemes: (number | null)[]; allocations: number[]; rebalancingEnabled: boolean }[]
+  >(
     initialParams.portfolios && initialParams.portfolios.length > 0
       ? initialParams.portfolios.map((p: any) => ({
           selectedSchemes: p.selectedSchemes && p.selectedSchemes.length > 0 ? p.selectedSchemes : [DEFAULT_SCHEME_CODE],
           allocations: p.allocations && p.allocations.length > 0 ? p.allocations : [100],
+          rebalancingEnabled: typeof p.rebalancingEnabled === 'boolean' ? p.rebalancingEnabled : false,
         }))
-      : [{ selectedSchemes: [DEFAULT_SCHEME_CODE], allocations: [100] }]
+      : [{ selectedSchemes: [DEFAULT_SCHEME_CODE], allocations: [100], rebalancingEnabled: false }]
   );
   const [years, setYears] = React.useState<number>(initialParams.years || 1);
 
@@ -25,7 +28,7 @@ export function usePortfolios(DEFAULT_SCHEME_CODE: number) {
   const handleAddPortfolio = () => {
     setPortfolios(prev => [
       ...prev,
-      { selectedSchemes: [DEFAULT_SCHEME_CODE], allocations: [100] }
+      { selectedSchemes: [DEFAULT_SCHEME_CODE], allocations: [100], rebalancingEnabled: false }
     ]);
   };
 
@@ -65,6 +68,14 @@ export function usePortfolios(DEFAULT_SCHEME_CODE: number) {
     }));
   };
 
+  const handleToggleRebalancing = (portfolioIdx: number) => {
+    setPortfolios(prev => prev.map((p, i) =>
+      i === portfolioIdx
+        ? { ...p, rebalancingEnabled: !p.rebalancingEnabled }
+        : p
+    ));
+  };
+
   // Sync portfolios and years to query params (schemes and allocations)
   React.useEffect(() => {
     setQueryParams(portfolios, years);
@@ -80,5 +91,6 @@ export function usePortfolios(DEFAULT_SCHEME_CODE: number) {
     handleAddFund,
     handleRemoveFund,
     handleAllocationChange,
+    handleToggleRebalancing,
   };
 } 

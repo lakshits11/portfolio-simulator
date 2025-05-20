@@ -11,6 +11,8 @@ interface FundControlsProps {
   onRemoveFund: (idx: number) => void;
   onAllocationChange: (idx: number, value: number) => void;
   disableControls: boolean;
+  rebalancingEnabled: boolean;
+  onToggleRebalancing: () => void;
 }
 
 export const FundControls: React.FC<FundControlsProps> = ({
@@ -22,6 +24,8 @@ export const FundControls: React.FC<FundControlsProps> = ({
   onRemoveFund,
   onAllocationChange,
   disableControls,
+  rebalancingEnabled,
+  onToggleRebalancing,
 }) => (
   <>
     {selectedSchemes.map((scheme, idx) => (
@@ -46,6 +50,18 @@ export const FundControls: React.FC<FundControlsProps> = ({
         )}
       </div>
     ))}
-    <button style={{ marginTop: 8 }} onClick={onAddFund} disabled={disableControls}>Add new fund</button>
+    <div style={{ display: 'flex', alignItems: 'center', marginTop: 8, gap: 16 }}>
+      <button onClick={onAddFund} disabled={disableControls}>Add new fund</button>
+      <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+        <input
+          type="checkbox"
+          checked={rebalancingEnabled}
+          onChange={onToggleRebalancing}
+          disabled={disableControls}
+          style={{ marginRight: 6 }}
+        />
+        Enable Rebalancing
+      </label>
+    </div>
   </>
 ); 
