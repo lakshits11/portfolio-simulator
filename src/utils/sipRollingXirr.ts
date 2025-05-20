@@ -24,7 +24,7 @@ export interface Transaction {
 export function calculateSipRollingXirr(
   navDataList: NavEntry[][],
   years: number = 1,
-  allocations?: number[]
+  allocations: number[]
 ): SipRollingXirrEntry[] {
   if (!isValidInput(navDataList)) return [];
 
@@ -44,7 +44,7 @@ function computeSipXirrForDate(
   fundDateMaps: Map<string, NavEntry>[],
   months: number,
   firstDate: Date,
-  allocations?: number[]
+  allocations: number[]
 ): SipRollingXirrEntry[] {
   const { transactions, unitsPerFund } = calculateTransactionsForDate(
     currentDate,
@@ -76,7 +76,7 @@ function calculateTransactionsForDate(
   fundDateMaps: Map<string, NavEntry>[],
   months: number,
   firstDate: Date,
-  allocations?: number[]
+  allocations: number[]
 ): { transactions: Transaction[] | null; unitsPerFund: number[] } {
   const totalInvestment = 100;
   const numFunds = fundDateMaps.length;
@@ -97,7 +97,7 @@ function calculateTransactionsForDate(
       const entry = navMap.get(dateKey);
       if (!entry) return { transactions: null, unitsPerFund };
 
-      const alloc = allocations?.[fundIdx] ?? (100 / numFunds);
+      const alloc = allocations[fundIdx];
       const amount = totalInvestment * (alloc / 100);
       const units = amount / entry.nav;
 
