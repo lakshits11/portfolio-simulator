@@ -62,17 +62,32 @@ function computeSipXirrForDate(
   if (!sells) return [];
 
   const allTransactions = [...transactions, ...sells];
-  const cashflows = allTransactions.map(tx => {
-    return {
-      amount: tx.amount,
-      when: tx.when
-    };
-  });
+
+  // Aggregate cashflows by date
+  const aggregatedCashflowsMap = new Map<string, number>();
+  for (const tx of allTransactions) {
+    const dateKey = toDateKey(tx.when);
+    const currentAmount = aggregatedCashflowsMap.get(dateKey) || 0;
+    aggregatedCashflowsMap.set(dateKey, currentAmount + tx.amount);
+  }
+
+  const cashflowsForXirr = Array.from(aggregatedCashflowsMap.entries()).map(([dateStr, amount]) => ({
+    amount,
+    when: new Date(dateStr), // Convert date string back to Date object
+  }));
+
+  // Sort cashflows by date, as xirr might require it (though not explicitly stated, it's good practice)
+  cashflowsForXirr.sort((a, b) => a.when.getTime() - b.when.getTime());
+
+  // The xirr library is expected to throw errors for invalid conditions
+  // (e.g., < 2 cashflows, all same sign, non-convergence).
+  // These errors will propagate up.
+  const calculatedXirrValue = xirr(cashflowsForXirr);
 
   return [{
     date: currentDate,
-    xirr: xirr(cashflows),
-    transactions: allTransactions
+    xirr: calculatedXirrValue,
+    transactions: allTransactions // Return original, non-aggregated transactions for display
   }];
 }
 
