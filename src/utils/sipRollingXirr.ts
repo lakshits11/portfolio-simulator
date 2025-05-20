@@ -63,17 +63,8 @@ function computeSipXirrForDate(
 
   const allTransactions = [...transactions, ...sells];
   const cashflows = allTransactions.map(tx => {
-    let cashflowAmount = tx.amount;
-    if (tx.type === 'buy') {
-      cashflowAmount = -tx.amount;
-    } else if (tx.type === 'rebalance') {
-      // For rebalance: if amount is positive (buy), cashflow is negative.
-      // If amount is negative (sell), cashflow is positive.
-      cashflowAmount = -tx.amount; 
-    }
-    // For 'sell' type, tx.amount is already positive, representing inflow.
     return {
-      amount: cashflowAmount,
+      amount: tx.amount,
       when: tx.when
     };
   });
@@ -115,8 +106,8 @@ function calculateTransactionsForDate(
       if (!entry) return { transactions: null, unitsPerFund };
 
       const initialAlloc = allocations[fundIdx];
-      const amount = totalInvestment * (initialAlloc / 100);
-      const units = amount / entry.nav;
+      const investmentAmount = totalInvestment * (initialAlloc / 100);
+      const units = investmentAmount / entry.nav;
 
       cumulativeUnits[fundIdx] += units;
       // unitsPerFund tracks total units for final sale, so add SIP units here
@@ -130,7 +121,7 @@ function calculateTransactionsForDate(
         nav: entry.nav,
         when: entry.date,
         units,
-        amount,
+        amount: -investmentAmount,
         type: 'buy',
         cumulativeUnits: cumulativeUnits[fundIdx],
         currentValue: currentFundValue,
@@ -183,7 +174,7 @@ function calculateTransactionsForDate(
               when: sipDate,
               nav: entry.nav,
               units: rebalanceUnits, // can be negative
-              amount: rebalanceAmount, // can be negative
+              amount: -rebalanceAmount, // Store buy as negative, sell as positive
               type: 'rebalance',
               cumulativeUnits: cumulativeUnits[fundIdx],
               currentValue: cumulativeUnits[fundIdx] * entry.nav, // Value after rebalance
