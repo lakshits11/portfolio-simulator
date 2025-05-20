@@ -48,11 +48,17 @@ const TransactionModal: React.FC<TransactionModalProps & { funds: any[] }> = ({ 
     };
   }, [visible, onClose]);
 
-  // Sort transactions by date, then by fund name
+  // Sort transactions by date, then by type (buy, rebalance, sell), then by fund name
+  const typeOrder = { buy: 0, rebalance: 1, sell: 2 };
   const sortedTxs = [...transactions].sort((a, b) => {
     const dateA = a.when.getTime();
     const dateB = b.when.getTime();
     if (dateA !== dateB) return dateA - dateB;
+
+    const typeAOrder = typeOrder[a.type];
+    const typeBOrder = typeOrder[b.type];
+    if (typeAOrder !== typeBOrder) return typeAOrder - typeBOrder;
+
     const fundA = funds[a.fundIdx]?.schemeName || `Fund ${a.fundIdx + 1}`;
     const fundB = funds[b.fundIdx]?.schemeName || `Fund ${b.fundIdx + 1}`;
     return fundA.localeCompare(fundB);
@@ -104,7 +110,9 @@ const TransactionModal: React.FC<TransactionModalProps & { funds: any[] }> = ({ 
               return (
                 <tr key={idx} style={{ background: idx % 2 === 0 ? '#fff' : '#f9f9f9' }}>
                   <td style={{ padding: '6px 8px', border: '1px solid #ccc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{fundName}</td>
-                  <td style={{ padding: '6px 8px', border: '1px solid #ccc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{tx.type === 'buy' ? 'Buy' : 'Sell'}</td>
+                  <td style={{ padding: '6px 8px', border: '1px solid #ccc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {tx.type === 'buy' ? 'Buy' : tx.type === 'sell' ? 'Sell' : 'Rebalance'}
+                  </td>
                   <td style={{ padding: '6px 8px', border: '1px solid #ccc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{formatDate(tx.when)}</td>
                   <td style={{ padding: '6px 8px', border: '1px solid #ccc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{tx.nav.toFixed(2)}</td>
                   <td style={{ padding: '6px 8px', border: '1px solid #ccc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{tx.units.toFixed(4)}</td>
