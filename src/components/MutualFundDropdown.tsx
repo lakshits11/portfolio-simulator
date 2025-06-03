@@ -11,8 +11,8 @@ export const MutualFundDropdown: React.FC<MutualFundDropdownProps> = ({ funds, o
   const allFunds = funds;
 
   return (
-    <select 
-      style={{ width: '100%', padding: '8px' }}
+    <select
+      className="w-full px-3 py-2 border border-gray-300 rounded bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-200"
       onChange={(e) => onSelect(Number(e.target.value))}
       value={value ?? ''}
     >

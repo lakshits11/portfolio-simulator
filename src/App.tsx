@@ -56,18 +56,20 @@ const App: React.FC = () => {
                 return (
                   <div
                     key={pIdx}
-                    className="relative border-2 border-blue-500 rounded-lg p-4 mb-5 bg-indigo-50 shadow-sm"
+                    className="relative border border-gray-200 rounded-lg p-4 mb-5 bg-white shadow"
                   >
                     {portfolios.length > 1 && (
                       <button
                         onClick={() => setPortfolios(prev => prev.filter((_, i) => i !== pIdx))}
-                        className="absolute top-2 right-2 text-2xl text-gray-400 hover:text-red-500 bg-transparent border-none cursor-pointer p-0 leading-none"
+                        className="absolute top-2 right-2 text-2xl text-gray-300 hover:text-red-500 bg-transparent border-none cursor-pointer p-0 leading-none"
                         title={`Remove Portfolio ${pIdx + 1}`}
                       >
                         &times;
                       </button>
                     )}
-                    <div className="font-semibold mb-2 text-lg text-blue-800">Portfolio {pIdx + 1}</div>
+                    <div className="font-semibold mb-4 text-lg text-blue-700 flex items-center gap-2">
+                      Portfolio {pIdx + 1}
+                    </div>
                     {/* Only fund controls inside each portfolio */}
                     <FundControls
                       selectedSchemes={portfolio.selectedSchemes}
