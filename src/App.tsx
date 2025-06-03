@@ -41,6 +41,45 @@ const App: React.FC = () => {
     p => (p.allocations || []).reduce((a, b) => a + (Number(b) || 0), 0) !== 100
   );
 
+  // Helper to invalidate chart
+  const invalidateChart = () => {
+    plotState.setHasPlotted(false);
+    plotState.setNavDatas({});
+    plotState.setLumpSumXirrDatas({});
+    plotState.setSipXirrDatas({});
+    plotState.setXirrError(null);
+  };
+
+  // Wrapped handlers to invalidate chart on change
+  const handleAddPortfolioInvalidate = () => {
+    invalidateChart();
+    handleAddPortfolio();
+  };
+  const handleFundSelectInvalidate = (pIdx: number, idx: number, code: number) => {
+    invalidateChart();
+    handleFundSelect(pIdx, idx, code);
+  };
+  const handleAddFundInvalidate = (pIdx: number) => {
+    invalidateChart();
+    handleAddFund(pIdx);
+  };
+  const handleRemoveFundInvalidate = (pIdx: number, idx: number) => {
+    invalidateChart();
+    handleRemoveFund(pIdx, idx);
+  };
+  const handleAllocationChangeInvalidate = (pIdx: number, idx: number, value: number) => {
+    invalidateChart();
+    handleAllocationChange(pIdx, idx, value);
+  };
+  const handleToggleRebalancingInvalidate = (pIdx: number) => {
+    invalidateChart();
+    handleToggleRebalancing(pIdx);
+  };
+  const handleRebalancingThresholdChangeInvalidate = (pIdx: number, value: number) => {
+    invalidateChart();
+    handleRebalancingThresholdChange(pIdx, value);
+  };
+
   return (
     <Container>
       <div className="relative">
@@ -75,15 +114,15 @@ const App: React.FC = () => {
                       selectedSchemes={portfolio.selectedSchemes}
                       allocations={portfolio.allocations}
                       funds={funds}
-                      onFundSelect={(idx, code) => handleFundSelect(pIdx, idx, code)}
-                      onAddFund={() => handleAddFund(pIdx)}
-                      onRemoveFund={idx => handleRemoveFund(pIdx, idx)}
-                      onAllocationChange={(idx, value) => handleAllocationChange(pIdx, idx, value)}
+                      onFundSelect={(idx, code) => handleFundSelectInvalidate(pIdx, idx, code)}
+                      onAddFund={() => handleAddFundInvalidate(pIdx)}
+                      onRemoveFund={idx => handleRemoveFundInvalidate(pIdx, idx)}
+                      onAllocationChange={(idx, value) => handleAllocationChangeInvalidate(pIdx, idx, value)}
                       disableControls={plotState.loadingNav || plotState.loadingXirr}
                       rebalancingEnabled={portfolio.rebalancingEnabled}
-                      onToggleRebalancing={() => handleToggleRebalancing(pIdx)}
+                      onToggleRebalancing={() => handleToggleRebalancingInvalidate(pIdx)}
                       rebalancingThreshold={portfolio.rebalancingThreshold}
-                      onRebalancingThresholdChange={value => handleRebalancingThresholdChange(pIdx, value)}
+                      onRebalancingThresholdChange={value => handleRebalancingThresholdChangeInvalidate(pIdx, value)}
                     />
                     {allocationSum !== 100 && (
                       <div className="absolute bottom-2 right-4 text-red-600 text-xs font-medium">
@@ -95,7 +134,7 @@ const App: React.FC = () => {
               })}
               <button
                 className="block mx-auto mb-6 px-5 py-2 text-base rounded-md border border-gray-300 bg-gray-50 text-gray-800 hover:bg-blue-100 transition-colors shadow-sm"
-                onClick={handleAddPortfolio}
+                onClick={handleAddPortfolioInvalidate}
               >
                 + Portfolio
               </button>
