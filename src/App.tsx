@@ -97,34 +97,36 @@ const App: React.FC = () => {
               + Portfolio
             </button>
             {/* Rolling period and Plot button below Add Portfolio */}
-            <div className="flex items-center justify-center gap-3 mb-8">
-              <label htmlFor="years-input" className="text-base text-gray-700 font-medium">
-                Rolling Period (years):
-              </label>
-              <input
-                id="years-input"
-                type="number"
-                min={1}
-                max={30}
-                value={years}
-                onChange={e => {
-                  setYears(Math.max(1, Math.floor(Number(e.target.value))));
-                  plotState.setHasPlotted(false);
-                  plotState.setNavDatas({});
-                  plotState.setLumpSumXirrDatas({});
-                  plotState.setSipXirrDatas({});
-                  plotState.setXirrError(null);
-                }}
-                className="w-20 px-3 py-2 text-base rounded-md border border-gray-300 bg-gray-50 text-gray-800 outline-none text-center focus:ring-2 focus:ring-blue-200"
-                disabled={plotState.loadingNav || plotState.loadingXirr}
-              />
-              <button
-                className="px-5 py-2 text-base rounded-md border border-gray-300 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors shadow-sm disabled:bg-gray-200 disabled:text-gray-400 disabled:border-gray-200"
-                onClick={handlePlotAllPortfolios}
-                disabled={plotState.loadingNav || plotState.loadingXirr || anyInvalidAlloc}
-              >
-                Plot
-              </button>
+            <div className="relative border-2 border-blue-300 rounded-lg p-4 mb-8 bg-blue-50 shadow-sm w-full max-w-xl">
+              <div className="flex items-center justify-start gap-3">
+                <label htmlFor="years-input" className="text-base text-gray-700 font-medium">
+                  Rolling Period (years):
+                </label>
+                <input
+                  id="years-input"
+                  type="number"
+                  min={1}
+                  max={30}
+                  value={years}
+                  onChange={e => {
+                    setYears(Math.max(1, Math.floor(Number(e.target.value))));
+                    plotState.setHasPlotted(false);
+                    plotState.setNavDatas({});
+                    plotState.setLumpSumXirrDatas({});
+                    plotState.setSipXirrDatas({});
+                    plotState.setXirrError(null);
+                  }}
+                  className="w-20 px-3 py-2 text-base rounded-md border border-gray-300 bg-gray-50 text-gray-800 outline-none text-center focus:ring-2 focus:ring-blue-200"
+                  disabled={plotState.loadingNav || plotState.loadingXirr}
+                />
+                <button
+                  className="px-5 py-2 text-base rounded-md border border-gray-300 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors shadow-sm disabled:bg-gray-200 disabled:text-gray-400 disabled:border-gray-200"
+                  onClick={handlePlotAllPortfolios}
+                  disabled={plotState.loadingNav || plotState.loadingXirr || anyInvalidAlloc}
+                >
+                  Plot
+                </button>
+              </div>
             </div>
             <ChartArea
               xirrError={plotState.xirrError}
