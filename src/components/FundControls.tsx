@@ -69,30 +69,34 @@ export const FundControls: React.FC<FundControlsProps> = ({
       >
         + Fund
       </button>
-      <label className="flex items-center cursor-pointer">
-        <input
-          type="checkbox"
-          checked={rebalancingEnabled}
-          onChange={onToggleRebalancing}
-          disabled={disableControls}
-          className="mr-1.5 accent-blue-500"
-        />
-        Enable Rebalancing
-      </label>
-      {rebalancingEnabled && (
-        <div className="flex items-center gap-1.5">
-          <label htmlFor="rebal-threshold-input" className="text-sm">Threshold (%):</label>
-          <input
-            id="rebal-threshold-input"
-            type="number"
-            min={0}
-            max={100}
-            value={rebalancingThreshold}
-            onChange={e => onRebalancingThresholdChange(Number(e.target.value))}
-            disabled={disableControls}
-            className="w-14 px-1 py-0.5 rounded border border-gray-300 text-sm"
-          />
-        </div>
+      {selectedSchemes.length > 1 && (
+        <>
+          <label className="flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={rebalancingEnabled}
+              onChange={onToggleRebalancing}
+              disabled={disableControls}
+              className="mr-1.5 accent-blue-500"
+            />
+            Enable Rebalancing
+          </label>
+          {rebalancingEnabled && (
+            <div className="flex items-center gap-1.5">
+              <label htmlFor="rebal-threshold-input" className="text-sm">Threshold (%):</label>
+              <input
+                id="rebal-threshold-input"
+                type="number"
+                min={0}
+                max={100}
+                value={rebalancingThreshold}
+                onChange={e => onRebalancingThresholdChange(Number(e.target.value))}
+                disabled={disableControls}
+                className="w-14 px-1 py-0.5 rounded border border-gray-300 text-sm"
+              />
+            </div>
+          )}
+        </>
       )}
     </div>
   </>

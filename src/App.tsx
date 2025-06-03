@@ -169,6 +169,7 @@ const App: React.FC = () => {
                 >
                   Plot
                 </button>
+                <span className="text-xs text-gray-500 ml-2">Tip: Click on a point in the graph to see more details for that specific date.</span>
               </div>
             </div>
             <ChartArea
