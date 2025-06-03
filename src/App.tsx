@@ -50,13 +50,13 @@ const App: React.FC = () => {
         {error && <div className="text-red-600 text-center mb-4">{error}</div>}
         {!loading && !error && funds.length > 0 && (
           <>
-            <div className="relative border-2 border-gray-200 rounded-lg p-4 mb-8 bg-white shadow-sm w-full max-w-xl">
+            <div className="relative border-2 border-gray-200 rounded-lg p-4 mb-8 bg-white shadow-sm w-full">
               {portfolios.map((portfolio, pIdx) => {
                 const allocationSum = (portfolio.allocations || []).reduce((a, b) => a + (Number(b) || 0), 0);
                 return (
                   <div
                     key={pIdx}
-                    className="relative border border-gray-200 rounded-lg p-4 mb-5 bg-white shadow"
+                    className="relative border border-gray-200 rounded-lg p-4 mb-5 bg-white shadow w-full"
                   >
                     {portfolios.length > 1 && (
                       <button
@@ -101,7 +101,7 @@ const App: React.FC = () => {
               </button>
             </div>
             {/* Rolling period and Plot button below Add Portfolio */}
-            <div className="relative border-2 border-gray-200 rounded-lg p-4 mb-8 bg-white shadow-sm w-full max-w-xl">
+            <div className="relative border-2 border-gray-200 rounded-lg p-4 mb-8 bg-white shadow-sm w-full">
               <div className="flex items-center justify-start gap-3">
                 <label htmlFor="years-input" className="text-base text-gray-700 font-medium">
                   Rolling Period (years):
