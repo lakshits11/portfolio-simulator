@@ -33,7 +33,7 @@ export const FundControls: React.FC<FundControlsProps> = ({
 }) => (
   <>
     {selectedSchemes.map((scheme, idx) => (
-      <div key={idx} style={{ display: 'flex', alignItems: 'center', marginBottom: 8, gap: 8 }}>
+      <div key={idx} className="flex items-center mb-2 gap-2">
         <MutualFundDropdown
           funds={funds.filter(f => !selectedSchemes.includes(f.schemeCode) || f.schemeCode === scheme)}
           onSelect={code => onFundSelect(idx, code)}
@@ -45,30 +45,43 @@ export const FundControls: React.FC<FundControlsProps> = ({
           max={100}
           value={allocations[idx] ?? 0}
           onChange={e => onAllocationChange(idx, Number(e.target.value))}
-          style={{ width: 60, marginLeft: 8 }}
+          className="w-16 ml-2 px-2 py-1 rounded border border-gray-300 text-base"
           disabled={disableControls}
         />
-        <span style={{ marginLeft: 2 }}>%</span>
+        <span className="ml-1">%</span>
         {selectedSchemes.length > 1 && (
-          <button style={{ marginLeft: 8 }} onClick={() => onRemoveFund(idx)} disabled={disableControls}>-</button>
+          <button
+            className="ml-2 px-2 py-1 rounded bg-red-500 text-white font-bold hover:bg-red-600 transition-colors disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed"
+            onClick={() => onRemoveFund(idx)}
+            disabled={disableControls}
+            title="Remove fund"
+          >
+            -
+          </button>
         )}
       </div>
     ))}
-    <div style={{ display: 'flex', alignItems: 'center', marginTop: 8, gap: 16 }}>
-      <button onClick={onAddFund} disabled={disableControls}>Add new fund</button>
-      <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+    <div className="flex items-center mt-2 gap-4">
+      <button
+        onClick={onAddFund}
+        disabled={disableControls}
+        className="px-3 py-1 rounded bg-blue-500 text-white font-medium hover:bg-blue-600 transition-colors disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed"
+      >
+        + Fund
+      </button>
+      <label className="flex items-center cursor-pointer">
         <input
           type="checkbox"
           checked={rebalancingEnabled}
           onChange={onToggleRebalancing}
           disabled={disableControls}
-          style={{ marginRight: 6 }}
+          className="mr-1.5 accent-blue-500"
         />
         Enable Rebalancing
       </label>
       {rebalancingEnabled && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <label htmlFor="rebal-threshold-input" style={{ fontSize: 14 }}>Threshold (%):</label>
+        <div className="flex items-center gap-1.5">
+          <label htmlFor="rebal-threshold-input" className="text-sm">Threshold (%):</label>
           <input
             id="rebal-threshold-input"
             type="number"
@@ -77,7 +90,7 @@ export const FundControls: React.FC<FundControlsProps> = ({
             value={rebalancingThreshold}
             onChange={e => onRebalancingThresholdChange(Number(e.target.value))}
             disabled={disableControls}
-            style={{ width: 50, padding: '2px 4px' }}
+            className="w-14 px-1 py-0.5 rounded border border-gray-300 text-sm"
           />
         </div>
       )}

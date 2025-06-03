@@ -232,7 +232,7 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
         <HighchartsReact
           highcharts={Highcharts}
           options={{
-            title: { text: 'Lump Sum Rolling 1Y XIRR Over Time' },
+            title: { text: 'Lump Sum Rolling 1Y' },
             xAxis: {
               categories: getLumpSumCategories(),
               title: { text: 'Date' },
@@ -254,7 +254,7 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
         <HighchartsReact
           highcharts={Highcharts}
           options={{
-            title: { text: `SIP Rolling ${years}Y XIRR Over Time` },
+            title: { text: `SIP Rolling ${years}Y XIRR` },
             xAxis: {
               categories: getSipCategories(),
               title: { text: 'Date' },

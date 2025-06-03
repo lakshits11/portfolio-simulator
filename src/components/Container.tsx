@@ -6,21 +6,8 @@ interface ContainerProps {
 
 export const Container: React.FC<ContainerProps> = ({ children }) => {
   return (
-    <div style={{ 
-      display: 'flex', 
-      justifyContent: 'center', 
-      minHeight: '100vh',
-      backgroundColor: '#f5f5f5'
-    }}>
-      <div style={{ 
-        width: '100%',
-        maxWidth: '600px',
-        padding: '20px',
-        backgroundColor: 'white',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        borderRadius: '8px',
-        margin: '20px'
-      }}>
+    <div className="flex justify-center min-h-screen bg-gray-100">
+      <div className="w-full max-w-xl p-5 bg-white shadow-md rounded-lg m-5">
         {children}
       </div>
     </div>

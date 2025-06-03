@@ -43,11 +43,11 @@ const App: React.FC = () => {
 
   return (
     <Container>
-      <div style={{ position: 'relative' }}>
+      <div className="relative">
         <LoadingOverlay active={plotState.loadingNav || plotState.loadingXirr} />
-        <h2 style={{ marginBottom: '20px' }}>Mutual Funds</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center text-blue-700">Portfolio Simulator</h2>
         {loading && <LoadingSpinner text="Loading list of mutual funds..." />}
-        {error && <div style={{ color: 'red' }}>{error}</div>}
+        {error && <div className="text-red-600 text-center mb-4">{error}</div>}
         {!loading && !error && funds.length > 0 && (
           <>
             {portfolios.map((portfolio, pIdx) => {
@@ -55,36 +55,18 @@ const App: React.FC = () => {
               return (
                 <div
                   key={pIdx}
-                  style={{
-                    border: '2px solid #007bff',
-                    borderRadius: 8,
-                    padding: 16,
-                    marginBottom: 20,
-                    background: '#f9f9ff',
-                    position: 'relative',
-                  }}
+                  className="relative border-2 border-blue-500 rounded-lg p-4 mb-5 bg-indigo-50 shadow-sm"
                 >
                   {portfolios.length > 1 && (
                     <button
                       onClick={() => setPortfolios(prev => prev.filter((_, i) => i !== pIdx))}
-                      style={{
-                        position: 'absolute',
-                        top: 8,
-                        right: 8,
-                        background: 'transparent',
-                        border: 'none',
-                        fontSize: 22,
-                        color: '#888',
-                        cursor: 'pointer',
-                        lineHeight: 1,
-                        padding: 0,
-                      }}
+                      className="absolute top-2 right-2 text-2xl text-gray-400 hover:text-red-500 bg-transparent border-none cursor-pointer p-0 leading-none"
                       title={`Remove Portfolio ${pIdx + 1}`}
                     >
                       &times;
                     </button>
                   )}
-                  <div style={{ fontWeight: 'bold', marginBottom: 8 }}>Portfolio {pIdx + 1}</div>
+                  <div className="font-semibold mb-2 text-lg text-blue-800">Portfolio {pIdx + 1}</div>
                   {/* Only fund controls inside each portfolio */}
                   <FundControls
                     selectedSchemes={portfolio.selectedSchemes}
@@ -101,7 +83,7 @@ const App: React.FC = () => {
                     onRebalancingThresholdChange={value => handleRebalancingThresholdChange(pIdx, value)}
                   />
                   {allocationSum !== 100 && (
-                    <div style={{ position: 'absolute', bottom: 8, right: 16, color: 'red', fontSize: 13 }}>
+                    <div className="absolute bottom-2 right-4 text-red-600 text-xs font-medium">
                       Allocation should add up to 100%
                     </div>
                   )}
@@ -109,30 +91,14 @@ const App: React.FC = () => {
               );
             })}
             <button
-              style={{
-                display: 'block',
-                margin: '0 auto 24px auto',
-                padding: '8px 20px',
-                fontSize: 16,
-                borderRadius: 6,
-                border: '1px solid #ccc',
-                background: '#fafafa',
-                color: '#333',
-                cursor: 'pointer',
-              }}
+              className="block mx-auto mb-6 px-5 py-2 text-base rounded-md border border-gray-300 bg-gray-50 text-gray-800 hover:bg-blue-100 transition-colors shadow-sm"
               onClick={handleAddPortfolio}
             >
-              Add Portfolio
+              + Portfolio
             </button>
             {/* Rolling period and Plot button below Add Portfolio */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 12,
-              marginBottom: 32,
-            }}>
-              <label htmlFor="years-input" style={{ fontSize: 16, color: '#333' }}>
+            <div className="flex items-center justify-center gap-3 mb-8">
+              <label htmlFor="years-input" className="text-base text-gray-700 font-medium">
                 Rolling Period (years):
               </label>
               <input
@@ -149,29 +115,11 @@ const App: React.FC = () => {
                   plotState.setSipXirrDatas({});
                   plotState.setXirrError(null);
                 }}
-                style={{
-                  width: 70,
-                  padding: '8px 12px',
-                  fontSize: 16,
-                  borderRadius: 6,
-                  border: '1px solid #ccc',
-                  background: '#fafafa',
-                  color: '#333',
-                  outline: 'none',
-                  textAlign: 'center',
-                }}
+                className="w-20 px-3 py-2 text-base rounded-md border border-gray-300 bg-gray-50 text-gray-800 outline-none text-center focus:ring-2 focus:ring-blue-200"
                 disabled={plotState.loadingNav || plotState.loadingXirr}
               />
               <button
-                style={{
-                  padding: '8px 20px',
-                  fontSize: 16,
-                  borderRadius: 6,
-                  border: '1px solid #ccc',
-                  background: '#fafafa',
-                  color: '#333',
-                  cursor: 'pointer',
-                }}
+                className="px-5 py-2 text-base rounded-md border border-gray-300 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors shadow-sm disabled:bg-gray-200 disabled:text-gray-400 disabled:border-gray-200"
                 onClick={handlePlotAllPortfolios}
                 disabled={plotState.loadingNav || plotState.loadingXirr || anyInvalidAlloc}
               >

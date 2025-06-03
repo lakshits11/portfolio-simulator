@@ -19,7 +19,7 @@ export const SipRollingXirrTable: React.FC<SipRollingXirrTableProps> = ({ data }
         { label: 'SIP Rolling 1Y XIRR', render: (row) => ((row.xirr * 100).toFixed(2) + '%') },
       ]}
       data={data}
-      chartTitle="SIP Rolling 1Y XIRR Over Time"
+      chartTitle="SIP Rolling 1Y XIRR"
       chartSeriesName="XIRR"
       chartColor="#ff9800"
       yAxisTitle="XIRR (%)"

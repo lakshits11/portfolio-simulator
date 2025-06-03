@@ -21,7 +21,7 @@ export const RollingXirrTable: React.FC<RollingXirrTableProps> = ({ data }) => {
         { label: 'Lump Sum Rolling 1Y XIRR', render: (row) => ((row.xirr * 100).toFixed(2) + '%') },
       ]}
       data={data}
-      chartTitle="Lump Sum Rolling 1Y XIRR Over Time"
+      chartTitle="Lump Sum Rolling 1Y XIRR"
       chartSeriesName="XIRR"
       chartColor="#28a745"
       yAxisTitle="XIRR (%)"
