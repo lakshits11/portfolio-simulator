@@ -1,29 +1,38 @@
 import React from 'react';
-import { mfapiMutualFund } from '../types/mfapiMutualFund';
+import { Select } from 'baseui/select';
 
 interface MutualFundDropdownProps {
-  funds: mfapiMutualFund[];
-  onSelect: (schemeCode: number) => void;
-  value?: number | null;
+  funds: { schemeCode: number; schemeName: string }[];
+  onSelect: (code: number) => void;
+  value?: number;
 }
 
 export const MutualFundDropdown: React.FC<MutualFundDropdownProps> = ({ funds, onSelect, value }) => {
-  const allFunds = funds;
+  // Base Web Select expects options as {label, id}
+  const options = funds.map(fund => ({
+    label: fund.schemeName,
+    id: fund.schemeCode,
+  }));
+
+  const selected = value != null ? options.find(opt => opt.id === value) : null;
 
   return (
-    <select
-      className="w-full px-3 py-2 border border-gray-300 rounded bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-200"
-      onChange={(e) => onSelect(Number(e.target.value))}
-      value={value ?? ''}
-    >
-      {(value === null || value === undefined) && (
-        <option value="">Select a mutual fund</option>
-      )}
-      {allFunds.map(fund => (
-        <option key={fund.schemeCode} value={fund.schemeCode}>
-          {fund.schemeName}
-        </option>
-      ))}
-    </select>
+    <Select
+      options={options}
+      value={selected ? [selected] : []}
+      placeholder="Select a mutual fund"
+      onChange={params => {
+        const selectedOption = params.value[0];
+        if (selectedOption && typeof selectedOption.id === 'number') {
+          onSelect(selectedOption.id);
+        }
+        // If no option, do nothing
+      }}
+      clearable={false}
+      searchable={true}
+      overrides={{
+        ControlContainer: { style: { width: '500px' } },
+      }}
+    />
   );
 }; 

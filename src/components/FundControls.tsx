@@ -1,12 +1,16 @@
 import React from 'react';
+import { Button } from 'baseui/button';
+import { Input } from 'baseui/input';
+import { Checkbox } from 'baseui/checkbox';
+import { Block } from 'baseui/block';
+import { FormControl } from 'baseui/form-control';
 import { MutualFundDropdown } from './MutualFundDropdown';
-import { mfapiMutualFund } from '../types/mfapiMutualFund';
 
 interface FundControlsProps {
   selectedSchemes: (number | null)[];
-  allocations: number[];
-  funds: mfapiMutualFund[];
-  onFundSelect: (idx: number, schemeCode: number) => void;
+  allocations: (number | null)[];
+  funds: { schemeCode: number; schemeName: string }[];
+  onFundSelect: (idx: number, code: number) => void;
   onAddFund: () => void;
   onRemoveFund: (idx: number) => void;
   onAllocationChange: (idx: number, value: number) => void;
@@ -33,71 +37,114 @@ export const FundControls: React.FC<FundControlsProps> = ({
 }) => (
   <>
     {selectedSchemes.map((scheme, idx) => (
-      <div key={idx} className="flex items-center mb-2 gap-2">
+      <Block key={idx} display="flex" alignItems="center" marginBottom="scale200" gridGap="scale300">
         <MutualFundDropdown
           funds={funds.filter(f => !selectedSchemes.includes(f.schemeCode) || f.schemeCode === scheme)}
           onSelect={code => onFundSelect(idx, code)}
           value={scheme ?? undefined}
         />
-        <input
+        <Input
           type="number"
           min={0}
           max={100}
           value={allocations[idx] ?? 0}
-          onChange={e => onAllocationChange(idx, Number(e.target.value))}
-          className="w-16 ml-2 px-2 py-1 rounded border border-gray-300 text-base"
+          onChange={e => onAllocationChange(idx, Number((e.target as HTMLInputElement).value))}
           disabled={disableControls}
+          overrides={{
+            Root: { style: { width: '120px' } },
+            After: () => (
+              <Block
+                overrides={{
+                  Block: {
+                    style: {
+                      fontSize: '14px',
+                      color: '#6b7280',
+                      paddingRight: '8px',
+                      alignSelf: 'center'
+                    }
+                  }
+                }}
+              >
+                %
+              </Block>
+            ),
+          }}
         />
-        <span className="ml-1">%</span>
         {selectedSchemes.length > 1 && (
-          <button
-            className="ml-2 px-2 py-1 rounded bg-red-500 text-white font-bold hover:bg-red-600 transition-colors disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed"
+          <Button
+            kind="secondary"
+            size="compact"
             onClick={() => onRemoveFund(idx)}
             disabled={disableControls}
+            overrides={{
+              BaseButton: {
+                style: {
+                  marginLeft: '8px',
+                  backgroundColor: '#ef4444',
+                  color: '#ffffff',
+                  fontWeight: 'bold',
+                  minWidth: '40px',
+                  height: '40px',
+                  padding: '8px',
+                  borderRadius: '4px',
+                  border: 'none',
+                  fontSize: '16px',
+                  cursor: 'pointer',
+                  ':hover': {
+                    backgroundColor: '#dc2626',
+                  },
+                  ':disabled': {
+                    backgroundColor: '#d1d5db',
+                    color: '#9ca3af',
+                  },
+                },
+              },
+            }}
             title="Remove fund"
           >
-            -
-          </button>
+            ✕
+          </Button>
         )}
-      </div>
+      </Block>
     ))}
-    <div className="flex items-center mt-2 gap-4">
-      <button
+    <Block display="flex" alignItems="center" marginTop="scale300" gridGap="scale800">
+      <Button
+        kind="primary"
+        size="compact"
         onClick={onAddFund}
         disabled={disableControls}
-        className="px-3 py-1 rounded bg-blue-500 text-white font-medium hover:bg-blue-600 transition-colors disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed"
       >
         + Fund
-      </button>
+      </Button>
       {selectedSchemes.length > 1 && (
         <>
-          <label className="flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={rebalancingEnabled}
-              onChange={onToggleRebalancing}
-              disabled={disableControls}
-              className="mr-1.5 accent-blue-500"
-            />
+          <Checkbox
+            checked={rebalancingEnabled}
+            onChange={onToggleRebalancing}
+            disabled={disableControls}
+          >
             Enable Rebalancing
-          </label>
+          </Checkbox>
           {rebalancingEnabled && (
-            <div className="flex items-center gap-1.5">
-              <label htmlFor="rebal-threshold-input" className="text-sm">Threshold (%):</label>
-              <input
-                id="rebal-threshold-input"
-                type="number"
-                min={0}
-                max={100}
-                value={rebalancingThreshold}
-                onChange={e => onRebalancingThresholdChange(Number(e.target.value))}
-                disabled={disableControls}
-                className="w-14 px-1 py-0.5 rounded border border-gray-300 text-sm"
-              />
-            </div>
+            <Block display="flex" alignItems="center" gridGap="scale200">
+              <FormControl label="Threshold (%)" caption={null}>
+                <Input
+                  type="number"
+                  min={0}
+                  max={100}
+                  value={rebalancingThreshold}
+                  onChange={e => onRebalancingThresholdChange(Number((e.target as HTMLInputElement).value))}
+                  disabled={disableControls}
+                  overrides={{
+                    Root: { style: { width: '70px' } },
+                  }}
+                  id="rebal-threshold-input"
+                />
+              </FormControl>
+            </Block>
           )}
         </>
       )}
-    </div>
+    </Block>
   </>
 ); 
