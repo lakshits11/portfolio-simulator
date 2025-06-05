@@ -13,6 +13,8 @@ import { Block } from 'baseui/block';
 import { Button } from 'baseui/button';
 import { Input } from 'baseui/input';
 import { FormControl } from 'baseui/form-control';
+import { HeadingLarge } from 'baseui/typography';
+import { LabelLarge, LabelMedium, LabelSmall } from 'baseui/typography';
 
 const DEFAULT_SCHEME_CODE = 120716;
 
@@ -88,36 +90,39 @@ const App: React.FC = () => {
     <Container>
       <Block position="relative">
         <LoadingOverlay active={plotState.loadingNav || plotState.loadingXirr} />
-        <Block 
-          marginBottom="1.5rem" 
-          overrides={{
-            Block: {
-              style: {
-                textAlign: 'center',
-                color: '#1d4ed8',
-                fontWeight: 'bold',
-                fontSize: '24px',
-                lineHeight: '32px'
-              }
-            }
-          }}
-        >
-          Portfolio Simulator
-        </Block>
-        {loading && <LoadingSpinner text="Loading list of mutual funds..." />}
-        {error && (
-          <Block 
-            color="#dc2626" 
-            marginBottom="1rem"
+        <Block marginBottom="1.5rem" display="flex" justifyContent="center">
+          <HeadingLarge 
             overrides={{
               Block: {
                 style: {
-                  textAlign: 'center'
+                  color: '#1d4ed8',
+                  fontWeight: 'bold',
+                  margin: 0
                 }
               }
             }}
           >
-            {error}
+            Portfolio Simulator
+          </HeadingLarge>
+        </Block>
+        {loading && <LoadingSpinner text="Loading list of mutual funds..." />}
+        {error && (
+          <Block 
+            marginBottom="1rem"
+            display="flex"
+            justifyContent="center"
+          >
+            <LabelMedium
+              overrides={{
+                Block: {
+                  style: {
+                    color: '#dc2626'
+                  }
+                }
+              }}
+            >
+              {error}
+            </LabelMedium>
           </Block>
         )}
         {!loading && !error && funds.length > 0 && (
@@ -187,22 +192,20 @@ const App: React.FC = () => {
                         &times;
                       </Button>
                     )}
-                    <Block 
-                      marginBottom="1rem" 
-                      color="#1d4ed8"
-                      display="flex"
-                      alignItems="center"
-                      gridGap="8px"
-                      overrides={{
-                        Block: {
-                          style: {
-                            fontWeight: '600',
-                            fontSize: '18px'
+                    <Block marginBottom="1rem">
+                      <LabelLarge
+                        overrides={{
+                          Block: {
+                            style: {
+                              color: '#1d4ed8',
+                              fontWeight: '600',
+                              margin: 0
+                            }
                           }
-                        }
-                      }}
-                    >
-                      Portfolio {pIdx + 1}
+                        }}
+                      >
+                        Portfolio {pIdx + 1}
+                      </LabelLarge>
                     </Block>
                     {/* Only fund controls inside each portfolio */}
                     <FundControls
@@ -224,17 +227,20 @@ const App: React.FC = () => {
                         position="absolute"
                         bottom="8px"
                         right="16px"
-                        color="#dc2626"
-                        overrides={{
-                          Block: {
-                            style: {
-                              fontSize: '12px',
-                              fontWeight: '500'
-                            }
-                          }
-                        }}
                       >
-                        Allocation should add up to 100%
+                        <LabelSmall
+                          overrides={{
+                            Block: {
+                              style: {
+                                color: '#dc2626',
+                                fontWeight: '500',
+                                margin: 0
+                              }
+                            }
+                          }}
+                        >
+                          Allocation should add up to 100%
+                        </LabelSmall>
                       </Block>
                     )}
                   </Block>
@@ -329,19 +335,19 @@ const App: React.FC = () => {
                 >
                   Plot
                 </Button>
-                <Block 
-                  color="#6b7280"
-                  marginLeft="8px"
+                <LabelSmall
                   overrides={{
                     Block: {
                       style: {
-                        fontSize: '12px'
+                        color: '#6b7280',
+                        marginLeft: '8px',
+                        margin: 0
                       }
                     }
                   }}
                 >
                   Tip: Click on a point in the graph to see more details for that specific date.
-                </Block>
+                </LabelSmall>
               </Block>
             </Block>
             <ChartArea
