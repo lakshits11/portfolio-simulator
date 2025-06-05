@@ -70,41 +70,29 @@ export const FundControls: React.FC<FundControlsProps> = ({
             ),
           }}
         />
-        {selectedSchemes.length > 1 && (
-          <Button
-            kind="secondary"
-            size="compact"
-            onClick={() => onRemoveFund(idx)}
-            disabled={disableControls}
-            overrides={{
-              BaseButton: {
-                style: {
-                  marginLeft: '8px',
-                  backgroundColor: '#ef4444',
-                  color: '#ffffff',
-                  fontWeight: 'bold',
-                  minWidth: '40px',
-                  height: '40px',
-                  padding: '8px',
-                  borderRadius: '4px',
-                  border: 'none',
-                  fontSize: '16px',
-                  cursor: 'pointer',
-                  ':hover': {
-                    backgroundColor: '#dc2626',
-                  },
-                  ':disabled': {
-                    backgroundColor: '#d1d5db',
-                    color: '#9ca3af',
-                  },
+        <Button
+          kind="tertiary"
+          size="mini"
+          onClick={() => onRemoveFund(idx)}
+          disabled={disableControls || selectedSchemes.length <= 1}
+          overrides={{
+            BaseButton: {
+              style: ({ $theme }) => ({
+                marginLeft: $theme.sizing.scale300,
+                color: $theme.colors.contentSecondary,
+                ':hover': {
+                  color: $theme.colors.contentPrimary,
                 },
-              },
-            }}
-            title="Remove fund"
-          >
-            ✕
-          </Button>
-        )}
+                ':disabled': {
+                  color: $theme.colors.contentTertiary,
+                },
+              }),
+            },
+          }}
+          title="Remove fund"
+        >
+          ✕
+        </Button>
       </Block>
     ))}
     <Block display="flex" alignItems="center" marginTop="scale300" gridGap="scale800">

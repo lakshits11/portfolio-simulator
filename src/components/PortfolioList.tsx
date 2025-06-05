@@ -58,29 +58,23 @@ export const PortfolioList: React.FC<PortfolioListProps> = ({
               <Button
                 onClick={() => setPortfolios(prev => prev.filter((_, i) => i !== pIdx))}
                 kind="tertiary"
-                size="compact"
+                size="mini"
                 overrides={{
                   BaseButton: {
                     style: ({ $theme }) => ({
                       position: 'absolute',
                       top: $theme.sizing.scale300,
                       right: $theme.sizing.scale300,
-                      fontSize: '24px',
                       color: $theme.colors.contentSecondary,
-                      background: 'transparent',
-                      border: 'none',
-                      cursor: 'pointer',
-                      padding: '0',
-                      lineHeight: '1',
                       ':hover': {
-                        color: $theme.colors.negative,
+                        color: $theme.colors.contentPrimary,
                       },
                     }),
                   },
                 }}
                 title={`Remove Portfolio ${pIdx + 1}`}
               >
-                &times;
+                ✕
               </Button>
             )}
             
