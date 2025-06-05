@@ -112,68 +112,70 @@ const App: React.FC = () => {
         
         {!loading && !error && funds.length > 0 && (
           <>
-            <Block display="flex" alignItems="center" justifyContent="space-between" marginBottom="2rem">
-              <HeadingLarge
-                overrides={{
-                  Block: {
-                    style: ({ $theme }) => ({
-                      margin: 0,
-                      color: $theme.colors.contentPrimary,
-                      fontWeight: '600'
-                    })
-                  }
-                }}
-              >
-                Portfolio SIP Simulator
-              </HeadingLarge>
+            <Block maxWidth="900px" margin="0 auto">
+              <Block display="flex" alignItems="center" justifyContent="space-between" marginBottom="2rem">
+                <HeadingLarge
+                  overrides={{
+                    Block: {
+                      style: ({ $theme }) => ({
+                        margin: 0,
+                        color: $theme.colors.contentPrimary,
+                        fontWeight: '600'
+                      })
+                    }
+                  }}
+                >
+                  Portfolio SIP Simulator
+                </HeadingLarge>
+                
+                <Button
+                  onClick={handleHelpClick}
+                  kind="tertiary"
+                  size="compact"
+                  overrides={{
+                    BaseButton: {
+                      style: ({ $theme }) => ({
+                        padding: '0.5rem 0.75rem',
+                        borderRadius: '6px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        ':hover': {
+                          backgroundColor: $theme.colors.backgroundSecondary
+                        }
+                      })
+                    }
+                  }}
+                  title="How to use Portfolio SIP Simulator"
+                >
+                  ❓ Help
+                </Button>
+              </Block>
               
-              <Button
-                onClick={handleHelpClick}
-                kind="tertiary"
-                size="compact"
-                overrides={{
-                  BaseButton: {
-                    style: ({ $theme }) => ({
-                      padding: '0.5rem 0.75rem',
-                      borderRadius: '6px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      ':hover': {
-                        backgroundColor: $theme.colors.backgroundSecondary
-                      }
-                    })
-                  }
-                }}
-                title="How to use Portfolio SIP Simulator"
-              >
-                ❓ Help
-              </Button>
-            </Block>
-            
-            <PortfolioList
-              portfolios={portfolios}
-              setPortfolios={setPortfolios}
-              funds={funds}
-              onFundSelect={handleFundSelectInvalidate}
-              onAddFund={handleAddFundInvalidate}
-              onRemoveFund={handleRemoveFundInvalidate}
-              onAllocationChange={handleAllocationChangeInvalidate}
-              onToggleRebalancing={handleToggleRebalancingInvalidate}
-              onRebalancingThresholdChange={handleRebalancingThresholdChangeInvalidate}
-              onAddPortfolio={handleAddPortfolioInvalidate}
-              disableControls={plotState.loadingNav || plotState.loadingXirr}
-              COLORS={plotState.COLORS}
-            />
+              <PortfolioList
+                portfolios={portfolios}
+                setPortfolios={setPortfolios}
+                funds={funds}
+                onFundSelect={handleFundSelectInvalidate}
+                onAddFund={handleAddFundInvalidate}
+                onRemoveFund={handleRemoveFundInvalidate}
+                onAllocationChange={handleAllocationChangeInvalidate}
+                onToggleRebalancing={handleToggleRebalancingInvalidate}
+                onRebalancingThresholdChange={handleRebalancingThresholdChangeInvalidate}
+                onAddPortfolio={handleAddPortfolioInvalidate}
+                disableControls={plotState.loadingNav || plotState.loadingXirr}
+                COLORS={plotState.COLORS}
+              />
 
-            <ControlsPanel
-              years={years}
-              setYears={setYears}
-              onPlot={handlePlotAllPortfolios}
-              disabled={plotState.loadingNav || plotState.loadingXirr}
-              anyInvalidAlloc={anyInvalidAlloc}
-              onYearsChange={handleYearsChange}
-            />
+              <ControlsPanel
+                years={years}
+                setYears={setYears}
+                onPlot={handlePlotAllPortfolios}
+                disabled={plotState.loadingNav || plotState.loadingXirr}
+                anyInvalidAlloc={anyInvalidAlloc}
+                onYearsChange={handleYearsChange}
+              />
+            </Block>
 
             <ChartArea
               xirrError={plotState.xirrError}
