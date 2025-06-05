@@ -8,10 +8,11 @@ import { usePlotState } from './hooks/usePlotState';
 import { usePortfolios } from './hooks/usePortfolios';
 import { usePortfolioPlot } from './hooks/usePortfolioPlot';
 import { Block } from 'baseui/block';
-import { AppHeader } from './components/AppHeader';
 import { LoadingErrorStates } from './components/LoadingErrorStates';
 import { PortfolioList } from './components/PortfolioList';
 import { ControlsPanel } from './components/ControlsPanel';
+import { HeadingLarge } from 'baseui/typography';
+import { Button } from 'baseui/button';
 
 const DEFAULT_SCHEME_CODE = 120716;
 
@@ -91,17 +92,59 @@ const App: React.FC = () => {
     plotState.setXirrError(null);
   };
 
+  const handleHelpClick = () => {
+    // TODO: Open help modal specific to Portfolio SIP Simulator
+    console.log('Portfolio SIP Simulator help clicked');
+  };
+
   return (
     <Container>
       <Block position="relative">
         <LoadingOverlay active={plotState.loadingNav || plotState.loadingXirr} />
         
-        <AppHeader />
-        
         <LoadingErrorStates loading={loading} error={error} />
         
         {!loading && !error && funds.length > 0 && (
           <>
+            <Block display="flex" alignItems="center" justifyContent="space-between" marginBottom="2rem">
+              <HeadingLarge
+                overrides={{
+                  Block: {
+                    style: ({ $theme }) => ({
+                      margin: 0,
+                      color: $theme.colors.contentPrimary,
+                      fontWeight: '600'
+                    })
+                  }
+                }}
+              >
+                Portfolio SIP Simulator
+              </HeadingLarge>
+              
+              <Button
+                onClick={handleHelpClick}
+                kind="tertiary"
+                size="compact"
+                overrides={{
+                  BaseButton: {
+                    style: ({ $theme }) => ({
+                      padding: '0.5rem 0.75rem',
+                      borderRadius: '6px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      ':hover': {
+                        backgroundColor: $theme.colors.backgroundSecondary
+                      }
+                    })
+                  }
+                }}
+                title="How to use Portfolio SIP Simulator"
+              >
+                ❓ Help
+              </Button>
+            </Block>
+            
             <PortfolioList
               portfolios={portfolios}
               setPortfolios={setPortfolios}

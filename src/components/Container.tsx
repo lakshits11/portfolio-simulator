@@ -1,5 +1,7 @@
 import React from 'react';
 import { Block } from 'baseui/block';
+import { TopPanel } from './TopPanel';
+import { LeftPanel } from './LeftPanel';
 
 interface ContainerProps {
   children: React.ReactNode;
@@ -8,27 +10,33 @@ interface ContainerProps {
 export const Container: React.FC<ContainerProps> = ({ children }) => {
   return (
     <Block
+      width="100%"
+      height="100vh"
       display="flex"
-      justifyContent="center"
-      minHeight="100vh"
-      backgroundColor="#f3f4f6"
+      flexDirection="column"
+      backgroundColor="#f8f9fa"
     >
-      <Block
-        width="100%"
-        maxWidth="768px"
-        padding="1.25rem"
-        backgroundColor="white"
-        overrides={{
-          Block: {
-            style: {
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-              borderRadius: '8px',
-              margin: '1.25rem'
-            }
-          }
-        }}
+      {/* Top Panel */}
+      <TopPanel />
+      
+      {/* Main Content Area with Left Panel and Content */}
+      <Block 
+        display="flex" 
+        flex="1"
+        overflow="hidden"
       >
-        {children}
+        {/* Left Sidebar */}
+        <LeftPanel />
+        
+        {/* Main Content */}
+        <Block
+          flex="1"
+          backgroundColor="white"
+          padding="1.5rem"
+          overflow="auto"
+        >
+          {children}
+        </Block>
       </Block>
     </Block>
   );
