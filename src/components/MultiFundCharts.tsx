@@ -634,8 +634,7 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
               itemStyle: {
                 fontSize: '13px',
                 fontWeight: '500',
-                color: '#374151',
-                fontFamily: 'system-ui, -apple-system, sans-serif'
+                color: '#374151'
               },
               itemHoverStyle: {
                 color: '#1f2937'
@@ -666,8 +665,7 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
               style: {
                 fontSize: '18px',
                 fontWeight: '600',
-                color: '#1f2937',
-                fontFamily: 'system-ui, -apple-system, sans-serif'
+                color: '#1f2937'
               }
             },
             xAxis: {
@@ -677,15 +675,13 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
                 style: {
                   fontSize: '14px',
                   fontWeight: '500',
-                  color: '#6b7280',
-                  fontFamily: 'system-ui, -apple-system, sans-serif'
+                  color: '#6b7280'
                 }
               },
               labels: { 
                 style: {
                   fontSize: '12px',
-                  color: '#6b7280',
-                  fontFamily: 'system-ui, -apple-system, sans-serif'
+                  color: '#6b7280'
                 }
               },
               gridLineColor: '#f3f4f6',
@@ -693,13 +689,16 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
               tickColor: '#e5e7eb'
             },
             yAxis: {
+              opposite: false,
               title: { 
                 text: 'XIRR (%)',
+                align: 'middle',
+                rotation: -90,
+                x: -10,
                 style: {
                   fontSize: '14px',
                   fontWeight: '500',
-                  color: '#6b7280',
-                  fontFamily: 'system-ui, -apple-system, sans-serif'
+                  color: '#6b7280'
                 }
               },
               labels: {
@@ -708,8 +707,7 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
                 },
                 style: {
                   fontSize: '12px',
-                  color: '#6b7280',
-                  fontFamily: 'system-ui, -apple-system, sans-serif'
+                  color: '#6b7280'
                 }
               },
               gridLineColor: '#f3f4f6',
@@ -738,9 +736,6 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
               backgroundColor: '#ffffff',
               borderRadius: 8,
               spacing: [20, 20, 20, 20],
-              style: {
-                fontFamily: 'system-ui, -apple-system, sans-serif'
-              },
               events: {
                 click: () => setModal(m => ({ ...m, visible: false })),
               } 
@@ -751,8 +746,7 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
               itemStyle: {
                 fontSize: '13px',
                 fontWeight: '500',
-                color: '#374151',
-                fontFamily: 'system-ui, -apple-system, sans-serif'
+                color: '#374151'
               },
               itemHoverStyle: {
                 color: '#1f2937'
@@ -767,8 +761,7 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
               borderRadius: 6,
               style: {
                 color: '#ffffff',
-                fontSize: '12px',
-                fontFamily: 'system-ui, -apple-system, sans-serif'
+                fontSize: '12px'
               },
               formatter: function (this: any) {
                 let tooltipHTML = `<div style="font-size: 12px; color: #ffffff;"><strong>${Highcharts.dateFormat('%e %b %Y', this.x)}</strong><br/>`;
