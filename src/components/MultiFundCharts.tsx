@@ -716,7 +716,7 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
                 value: 0,
                 width: 2,
                 color: '#aaa',
-                zIndex: 10
+                zIndex: 1
               }]
             },
             rangeSelector: {
