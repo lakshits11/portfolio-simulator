@@ -725,10 +725,37 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
             navigator: {
               enabled: true,
               height: 40,
-              margin: 10
+              margin: 10,
+              maskFill: 'rgba(107, 114, 128, 0.1)',
+              outlineColor: '#e5e7eb',
+              outlineWidth: 1,
+              handles: {
+                backgroundColor: '#ffffff',
+                borderColor: '#d1d5db'
+              },
+              xAxis: {
+                gridLineColor: '#f3f4f6',
+                labels: {
+                  style: {
+                    color: '#6b7280',
+                    fontSize: '11px'
+                  }
+                }
+              },
+              series: {
+                lineColor: '#6b7280',
+                fillOpacity: 0.05
+              }
             },
             scrollbar: {
-              enabled: true
+              enabled: true,
+              barBackgroundColor: '#f3f4f6',
+              barBorderColor: '#e5e7eb',
+              buttonBackgroundColor: '#ffffff',
+              buttonBorderColor: '#d1d5db',
+              rifleColor: '#6b7280',
+              trackBackgroundColor: '#f9fafb',
+              trackBorderColor: '#e5e7eb'
             },
             series: getSipSeries(),
             chart: { 
