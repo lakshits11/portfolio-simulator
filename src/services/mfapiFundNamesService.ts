@@ -12,7 +12,6 @@ export const fetchMutualFunds = async (): Promise<mfapiMutualFund[]> => {
   return allFunds
     .filter(fund =>
       fund.schemeName.toLowerCase().includes('direct') &&
-      fund.schemeName.toLowerCase().includes('growth') &&
       !fund.schemeName.toLowerCase().includes('idcw') &&
       !fund.schemeName.toLowerCase().includes('dividend') &&
       !fund.schemeName.toLowerCase().includes('days') &&
