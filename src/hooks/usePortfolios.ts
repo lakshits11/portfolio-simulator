@@ -1,21 +1,14 @@
 import React from 'react';
 import { getQueryParams, setQueryParams } from '../utils/queryParams';
-
-function getDefaultAllocations(n: number): number[] {
-  const base = Math.floor(100 / n);
-  const allocations = Array(n).fill(base);
-  allocations[n - 1] = 100 - base * (n - 1);
-  return allocations;
-}
+import { getDefaultAllocations } from '../utils/getDefaultAllocations';
+import { Portfolio } from '../types/portfolio';
 
 const DEFAULT_REBALANCING_THRESHOLD = 5;
 
 export function usePortfolios(DEFAULT_SCHEME_CODE: number) {
   // Initialize portfolios and years from query params
   const initialParams = React.useMemo(() => getQueryParams(), []);
-  const [portfolios, setPortfolios] = React.useState<
-    { selectedSchemes: (number | null)[]; allocations: number[]; rebalancingEnabled: boolean; rebalancingThreshold: number }[]
-  >(
+  const [portfolios, setPortfolios] = React.useState<Portfolio[]>(
     initialParams.portfolios && initialParams.portfolios.length > 0
       ? initialParams.portfolios.map((p: any) => ({
           selectedSchemes: p.selectedSchemes && p.selectedSchemes.length > 0 ? p.selectedSchemes : [DEFAULT_SCHEME_CODE],
