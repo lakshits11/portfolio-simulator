@@ -52,6 +52,12 @@ export const FundControls: React.FC<FundControlsProps> = ({
           disabled={disableControls}
           size="compact"
           overrides={{
+            Root: {
+              style: {
+                width: '100px',
+                flexShrink: 0
+              }
+            },
             After: () => (
               <Block
                 overrides={{
