@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Container } from './components/Container';
 import { useMutualFunds } from './hooks/useMutualFunds';
 import { useNavData } from './hooks/useNavData';
@@ -13,6 +13,7 @@ import { PortfolioList } from './components/PortfolioList';
 import { ControlsPanel } from './components/ControlsPanel';
 import { HeadingLarge } from 'baseui/typography';
 import { Button } from 'baseui/button';
+import { PortfolioSipHelpModal } from './components/PortfolioSipHelpModal';
 
 const DEFAULT_SCHEME_CODE = 120716;
 
@@ -20,6 +21,8 @@ const App: React.FC = () => {
   const { funds, loading, error } = useMutualFunds();
   const { loadNavData } = useNavData();
   const plotState = usePlotState(loadNavData, funds);
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+  
   const {
     portfolios,
     setPortfolios,
@@ -93,8 +96,11 @@ const App: React.FC = () => {
   };
 
   const handleHelpClick = () => {
-    // TODO: Open help modal specific to Portfolio SIP Simulator
-    console.log('Portfolio SIP Simulator help clicked');
+    setIsHelpModalOpen(true);
+  };
+
+  const closeHelpModal = () => {
+    setIsHelpModalOpen(false);
   };
 
   return (
@@ -185,6 +191,9 @@ const App: React.FC = () => {
             />
           </>
         )}
+        
+        {/* Help Modal */}
+        <PortfolioSipHelpModal isOpen={isHelpModalOpen} onClose={closeHelpModal} />
       </Block>
     </Container>
   );
