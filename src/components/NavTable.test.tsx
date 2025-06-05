@@ -17,11 +17,11 @@ describe('NavTable', () => {
     expect(screen.getByText('166.29450')).toBeInTheDocument();
     expect(screen.getByText('2025-05-08')).toBeInTheDocument();
     expect(screen.getByText('168.13110')).toBeInTheDocument();
-    expect(document.querySelector('table')).toBeInTheDocument();
+    expect(screen.getByText('Date').closest('div')).toBeInTheDocument();
   });
 
   it('renders nothing if navData is empty', () => {
     const { container } = render(<NavTable navData={[]} />);
-    expect(container.querySelector('table')).toBeNull();
+    expect(container.firstChild).toBeNull();
   });
 }); 

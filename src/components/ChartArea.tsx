@@ -2,6 +2,8 @@ import React from 'react';
 import { MultiFundCharts } from './MultiFundCharts';
 import { mfapiMutualFund } from '../types/mfapiMutualFund';
 import { LoadingSpinner } from './LoadingSpinner';
+import { Block } from 'baseui/block';
+import { LabelMedium } from 'baseui/typography';
 
 interface ChartAreaProps {
   xirrError: string | null;
@@ -33,19 +35,49 @@ export const ChartArea: React.FC<ChartAreaProps> = ({
   years,
 }) => (
   <>
-    {xirrError && <div style={{ color: 'red', marginTop: 16 }}>{xirrError}</div>}
-    <div style={{ minHeight: 350, position: 'relative', width: '100%' }}>
+    {xirrError && (
+      <Block marginTop="1rem">
+        <LabelMedium
+          overrides={{
+            Block: {
+              style: {
+                color: '#dc2626',
+                margin: 0
+              }
+            }
+          }}
+        >
+          {xirrError}
+        </LabelMedium>
+      </Block>
+    )}
+    <Block 
+      minHeight="350px" 
+      position="relative" 
+      width="100%"
+    >
       {(loadingNav || loadingXirr) ? (
-        <div style={{
-          position: 'absolute',
-          top: 0, left: 0, right: 0, bottom: 0,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          zIndex: 2,
-          background: 'rgba(255,255,255,0.0)',
-        }}>
+        <Block
+          position="absolute"
+          top="0"
+          left="0"
+          right="0"
+          bottom="0"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          overrides={{
+            Block: {
+              style: {
+                zIndex: 2,
+                background: 'rgba(255,255,255,0.0)'
+              }
+            }
+          }}
+        >
           {loadingNav && <LoadingSpinner text="Fetching NAV data..." />}
           {loadingXirr && <LoadingSpinner text="Calculating XIRR..." />}
-        </div>
+        </Block>
       ) : (
         hasPlotted && Object.keys(navDatas).length > 0 && (
           <MultiFundCharts
@@ -60,6 +92,6 @@ export const ChartArea: React.FC<ChartAreaProps> = ({
           />
         )
       )}
-    </div>
+    </Block>
   </>
 ); 

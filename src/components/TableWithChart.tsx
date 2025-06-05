@@ -1,6 +1,7 @@
 import React from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+import { Block } from 'baseui/block';
 
 interface Column<T> {
   label: string;
@@ -33,7 +34,10 @@ export function TableWithChart<T>({
   const chartData = [...data].sort((a, b) => getChartX(a).localeCompare(getChartX(b)));
 
   return (
-    <div style={{ maxWidth: '100%', marginTop: 24 }}>
+    <Block 
+      maxWidth="100%" 
+      marginTop="1.5rem"
+    >
       <HighchartsReact
         highcharts={Highcharts}
         options={{
@@ -60,6 +64,6 @@ export function TableWithChart<T>({
           legend: { enabled: false },
         }}
       />
-    </div>
+    </Block>
   );
 } 
