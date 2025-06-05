@@ -114,6 +114,7 @@ const App: React.FC = () => {
               onRebalancingThresholdChange={handleRebalancingThresholdChangeInvalidate}
               onAddPortfolio={handleAddPortfolioInvalidate}
               disableControls={plotState.loadingNav || plotState.loadingXirr}
+              COLORS={plotState.COLORS}
             />
 
             <ControlsPanel

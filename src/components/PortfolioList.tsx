@@ -18,6 +18,7 @@ interface PortfolioListProps {
   onRebalancingThresholdChange: (pIdx: number, value: number) => void;
   onAddPortfolio: () => void;
   disableControls: boolean;
+  COLORS: string[];
 }
 
 export const PortfolioList: React.FC<PortfolioListProps> = ({
@@ -31,7 +32,8 @@ export const PortfolioList: React.FC<PortfolioListProps> = ({
   onToggleRebalancing,
   onRebalancingThresholdChange,
   onAddPortfolio,
-  disableControls
+  disableControls,
+  COLORS
 }) => {
   return (
     <Block marginBottom="scale800">
@@ -47,7 +49,7 @@ export const PortfolioList: React.FC<PortfolioListProps> = ({
             overrides={{
               Block: {
                 style: ({ $theme }) => ({
-                  borderLeft: `4px solid ${$theme.colors.accent}`,
+                  borderLeft: `4px solid ${COLORS[pIdx % COLORS.length]}`,
                   borderRadius: $theme.borders.radius200,
                   transition: $theme.animation.timing200
                 })
