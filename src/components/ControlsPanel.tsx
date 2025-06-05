@@ -41,16 +41,10 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
         <Block display="flex" alignItems="center" gridGap="scale300">
           <LabelMedium>Rolling Period:</LabelMedium>
           <Select
-            options={[
-              { label: '1 year', id: '1' },
-              { label: '2 years', id: '2' },
-              { label: '3 years', id: '3' },
-              { label: '5 years', id: '5' },
-              { label: '7 years', id: '7' },
-              { label: '10 years', id: '10' },
-              { label: '15 years', id: '15' },
-              { label: '20 years', id: '20' },
-            ]}
+            options={Array.from({ length: 20 }, (_, i) => ({
+              label: `${i + 1} year${i + 1 > 1 ? 's' : ''}`,
+              id: (i + 1).toString()
+            }))}
             value={[{ label: `${years} year${years > 1 ? 's' : ''}`, id: years.toString() }]}
             placeholder="Select years"
             onChange={params => {
@@ -61,6 +55,7 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
             }}
             disabled={disabled}
             size="compact"
+            searchable={false}
             overrides={{
               Root: {
                 style: {
