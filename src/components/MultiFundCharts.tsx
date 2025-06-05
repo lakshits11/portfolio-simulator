@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import Highcharts from 'highcharts';
+import Highcharts from 'highcharts/highstock';
 import HighchartsReact from 'highcharts-react-official';
 import { mfapiMutualFund } from '../types/mfapiMutualFund';
 import { Block } from 'baseui/block';
@@ -527,12 +527,20 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
       (data || []).forEach((row: any) => {
         dateToXirr[formatDate(row.date)] = row.xirr * 100;
       });
+      
+      // Convert to timestamp-based data for stock chart
+      const seriesData = allDates.map(date => {
+        const xirr = dateToXirr[date];
+        return xirr !== undefined ? [new Date(date).getTime(), xirr] : null;
+      }).filter(point => point !== null);
+      
       return {
         name: portfolioName,
-        data: allDates.map(date => dateToXirr[date] ?? null),
+        data: seriesData,
         type: 'line',
         color: COLORS[idx % COLORS.length],
         marker: { enabled: false },
+        showInNavigator: true,
       };
     });
   };
@@ -651,6 +659,7 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
       <Block marginTop="1.5rem">
         <HighchartsReact
           highcharts={Highcharts}
+          constructorType={'stockChart'}
           options={{
             title: { 
               text: `SIP Rolling ${years}Y XIRR`,
@@ -662,7 +671,7 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
               }
             },
             xAxis: {
-              categories: getSipCategories(),
+              type: 'datetime',
               title: { 
                 text: 'Date',
                 style: {
@@ -673,7 +682,6 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
                 }
               },
               labels: { 
-                rotation: -45,
                 style: {
                   fontSize: '12px',
                   color: '#6b7280',
@@ -695,6 +703,9 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
                 }
               },
               labels: {
+                formatter: function (this: any) {
+                  return this.value + ' %';
+                },
                 style: {
                   fontSize: '12px',
                   color: '#6b7280',
@@ -702,11 +713,28 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
                 }
               },
               gridLineColor: '#f3f4f6',
-              lineColor: '#e5e7eb'
+              lineColor: '#e5e7eb',
+              plotLines: [{
+                value: 0,
+                width: 2,
+                color: '#aaa',
+                zIndex: 10
+              }]
+            },
+            rangeSelector: {
+              enabled: false
+            },
+            navigator: {
+              enabled: true,
+              height: 40,
+              margin: 10
+            },
+            scrollbar: {
+              enabled: true
             },
             series: getSipSeries(),
             chart: { 
-              height: 400,
+              height: 500,
               backgroundColor: '#ffffff',
               borderRadius: 8,
               spacing: [20, 20, 20, 20],
@@ -731,7 +759,9 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
               }
             },
             tooltip: { 
-              valueDecimals: 2,
+              shared: true,
+              crosshairs: true,
+              useHTML: true,
               backgroundColor: '#1f2937',
               borderColor: '#1f2937',
               borderRadius: 6,
@@ -739,18 +769,50 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
                 color: '#ffffff',
                 fontSize: '12px',
                 fontFamily: 'system-ui, -apple-system, sans-serif'
+              },
+              formatter: function (this: any) {
+                let tooltipHTML = `<div style="font-size: 12px; color: #ffffff;"><strong>${Highcharts.dateFormat('%e %b %Y', this.x)}</strong><br/>`;
+                
+                // Sort points by y value (descending) to show highest values first
+                const sortedPoints = this.points ? 
+                  [...this.points].sort((a: any, b: any) => (b.y as number) - (a.y as number)) : 
+                  [];
+                
+                sortedPoints.forEach((point: any) => {
+                  const formattedValue = (point.y as number).toFixed(2) + " %";
+                  const color = point.series.color;
+                  tooltipHTML += `<span style="color:${color}">●</span> ${point.series.name}: <strong>${formattedValue}</strong><br/>`;
+                });
+                
+                tooltipHTML += '</div>';
+                return tooltipHTML;
               }
             },
             plotOptions: {
               series: {
                 cursor: 'pointer',
+                animation: false,
+                marker: { 
+                  enabled: false,
+                  states: {
+                    hover: {
+                      enabled: true,
+                      radius: 5
+                    }
+                  }
+                },
+                states: {
+                  hover: {
+                    lineWidthPlus: 1
+                  }
+                },
                 point: {
                   events: {
                     click: function (this: Highcharts.Point, event: Highcharts.PointClickEventObject) {
                       // Find the portfolio and date for this point
                       const series = this.series;
                       const portfolioName = series.name;
-                      const pointDate = this.category as string; // category can be number | string | undefined
+                      const pointDate = Highcharts.dateFormat('%Y-%m-%d', this.x as number);
                       // Find the XIRR entry for this portfolio and date
                       const xirrEntry = (sipXirrDatas[portfolioName] || []).find((row: any) => formatDate(row.date) === pointDate);
                       if (xirrEntry) {
