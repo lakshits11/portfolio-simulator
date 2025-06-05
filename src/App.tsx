@@ -90,15 +90,15 @@ const App: React.FC = () => {
     <Container>
       <Block position="relative">
         <LoadingOverlay active={plotState.loadingNav || plotState.loadingXirr} />
-        <Block marginBottom="1.5rem" display="flex" justifyContent="center">
+        <Block marginBottom="scale800" display="flex" justifyContent="center">
           <HeadingLarge 
             overrides={{
               Block: {
-                style: {
-                  color: '#1d4ed8',
+                style: ({ $theme }) => ({
+                  color: $theme.colors.contentPrimary,
                   fontWeight: 'bold',
                   margin: 0
-                }
+                })
               }
             }}
           >
@@ -127,39 +127,28 @@ const App: React.FC = () => {
         )}
         {!loading && !error && funds.length > 0 && (
           <>
-            <Block
-              position="relative"
-              padding="1rem"
-              marginBottom="2rem"
-              backgroundColor="white"
-              width="100%"
-              overrides={{
-                Block: {
-                  style: {
-                    border: '2px solid #e5e7eb',
-                    borderRadius: '8px',
-                    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
-                  }
-                }
-              }}
-            >
+            {/* Portfolios Section */}
+            <Block marginBottom="scale800">
               {portfolios.map((portfolio, pIdx) => {
                 const allocationSum = (portfolio.allocations || []).reduce((a, b) => a + (Number(b) || 0), 0);
                 return (
                   <Block
                     key={pIdx}
                     position="relative"
-                    padding="1rem"
-                    marginBottom="1.25rem"
-                    backgroundColor="white"
-                    width="100%"
+                    padding="scale700"
+                    marginBottom="scale600"
+                    backgroundColor={pIdx % 2 === 0 ? "backgroundPrimary" : "backgroundSecondary"}
                     overrides={{
                       Block: {
-                        style: {
-                          border: '1px solid #e5e7eb',
-                          borderRadius: '8px',
-                          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
-                        }
+                        style: ({ $theme }) => ({
+                          borderLeft: `4px solid ${$theme.colors.accent}`,
+                          borderRadius: $theme.borders.radius200,
+                          transition: $theme.animation.timing200,
+                          ':hover': {
+                            borderLeftColor: $theme.colors.primary,
+                            backgroundColor: $theme.colors.backgroundTertiary
+                          }
+                        })
                       }
                     }}
                   >
@@ -170,21 +159,21 @@ const App: React.FC = () => {
                         size="compact"
                         overrides={{
                           BaseButton: {
-                            style: {
+                            style: ({ $theme }) => ({
                               position: 'absolute',
-                              top: '8px',
-                              right: '8px',
+                              top: $theme.sizing.scale300,
+                              right: $theme.sizing.scale300,
                               fontSize: '24px',
-                              color: '#d1d5db',
+                              color: $theme.colors.contentSecondary,
                               background: 'transparent',
                               border: 'none',
                               cursor: 'pointer',
                               padding: '0',
                               lineHeight: '1',
                               ':hover': {
-                                color: '#ef4444',
+                                color: $theme.colors.negative,
                               },
-                            },
+                            }),
                           },
                         }}
                         title={`Remove Portfolio ${pIdx + 1}`}
@@ -192,22 +181,23 @@ const App: React.FC = () => {
                         &times;
                       </Button>
                     )}
-                    <Block marginBottom="1rem">
+                    
+                    <Block marginBottom="scale500">
                       <LabelLarge
                         overrides={{
                           Block: {
-                            style: {
-                              color: '#1d4ed8',
+                            style: ({ $theme }) => ({
+                              color: $theme.colors.primary,
                               fontWeight: '600',
                               margin: 0
-                            }
+                            })
                           }
                         }}
                       >
                         Portfolio {pIdx + 1}
                       </LabelLarge>
                     </Block>
-                    {/* Only fund controls inside each portfolio */}
+                    
                     <FundControls
                       selectedSchemes={portfolio.selectedSchemes}
                       allocations={portfolio.allocations}
@@ -222,20 +212,21 @@ const App: React.FC = () => {
                       rebalancingThreshold={portfolio.rebalancingThreshold}
                       onRebalancingThresholdChange={value => handleRebalancingThresholdChangeInvalidate(pIdx, value)}
                     />
+                    
                     {allocationSum !== 100 && (
                       <Block 
                         position="absolute"
-                        bottom="8px"
-                        right="16px"
+                        bottom="scale300"
+                        right="scale400"
                       >
                         <LabelSmall
                           overrides={{
                             Block: {
-                              style: {
-                                color: '#dc2626',
+                              style: ({ $theme }) => ({
+                                color: $theme.colors.negative,
                                 fontWeight: '500',
                                 margin: 0
-                              }
+                              })
                             }
                           }}
                         >
@@ -246,46 +237,34 @@ const App: React.FC = () => {
                   </Block>
                 );
               })}
-              <Block display="flex" justifyContent="center" marginBottom="1.5rem">
+              
+              {/* Add Portfolio Button */}
+              <Block display="flex" justifyContent="center" marginTop="scale600">
                 <Button
                   kind="secondary"
                   onClick={handleAddPortfolioInvalidate}
-                  overrides={{
-                    BaseButton: {
-                      style: {
-                        border: '1px solid #d1d5db',
-                        backgroundColor: '#f9fafb',
-                        color: '#374151',
-                        ':hover': {
-                          backgroundColor: '#dbeafe',
-                        },
-                        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-                      },
-                    },
-                  }}
+                  startEnhancer={() => <span style={{ fontSize: '16px', marginRight: '4px' }}>+</span>}
                 >
-                  + Portfolio
+                  Add Portfolio
                 </Button>
               </Block>
             </Block>
-            {/* Rolling period and Plot button below Add Portfolio */}
+
+            {/* Controls Section */}
             <Block
-              position="relative"
-              padding="1rem"
-              marginBottom="2rem"
-              backgroundColor="white"
-              width="100%"
+              padding="scale600"
+              marginBottom="scale800"
+              backgroundColor="backgroundTertiary"
               overrides={{
                 Block: {
-                  style: {
-                    border: '2px solid #e5e7eb',
-                    borderRadius: '8px',
-                    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
-                  }
+                  style: ({ $theme }) => ({
+                    borderRadius: $theme.borders.radius300,
+                    border: `${$theme.borders.border200.borderWidth} ${$theme.borders.border200.borderStyle} ${$theme.colors.borderOpaque}`
+                  })
                 }
               }}
             >
-              <Block display="flex" alignItems="center" justifyContent="flex-start" gridGap="12px">
+              <Block display="flex" alignItems="center" justifyContent="flex-start" gridGap="scale400">
                 <FormControl label="Rolling Period (years):" caption={null}>
                   <Input
                     type="number"
@@ -320,29 +299,17 @@ const App: React.FC = () => {
                   kind="primary"
                   onClick={handlePlotAllPortfolios}
                   disabled={plotState.loadingNav || plotState.loadingXirr || anyInvalidAlloc}
-                  overrides={{
-                    BaseButton: {
-                      style: {
-                        backgroundColor: '#2563eb',
-                        fontWeight: '600',
-                        ':hover': {
-                          backgroundColor: '#1d4ed8',
-                        },
-                        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-                      },
-                    },
-                  }}
                 >
                   Plot
                 </Button>
                 <LabelSmall
                   overrides={{
                     Block: {
-                      style: {
-                        color: '#6b7280',
-                        marginLeft: '8px',
+                      style: ({ $theme }) => ({
+                        color: $theme.colors.contentSecondary,
+                        marginLeft: $theme.sizing.scale200,
                         margin: 0
-                      }
+                      })
                     }
                   }}
                 >
