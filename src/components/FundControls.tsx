@@ -50,8 +50,8 @@ export const FundControls: React.FC<FundControlsProps> = ({
           value={allocations[idx] ?? 0}
           onChange={e => onAllocationChange(idx, Number((e.target as HTMLInputElement).value))}
           disabled={disableControls}
+          size="compact"
           overrides={{
-            Root: { style: { width: '120px' } },
             After: () => (
               <Block
                 overrides={{
@@ -127,20 +127,35 @@ export const FundControls: React.FC<FundControlsProps> = ({
           </Checkbox>
           {rebalancingEnabled && (
             <Block display="flex" alignItems="center" gridGap="scale200">
-              <FormControl label="Threshold (%)" caption={null}>
-                <Input
-                  type="number"
-                  min={0}
-                  max={100}
-                  value={rebalancingThreshold}
-                  onChange={e => onRebalancingThresholdChange(Number((e.target as HTMLInputElement).value))}
-                  disabled={disableControls}
-                  overrides={{
-                    Root: { style: { width: '70px' } },
-                  }}
-                  id="rebal-threshold-input"
-                />
-              </FormControl>
+              <Input
+                type="number"
+                min={0}
+                max={100}
+                value={rebalancingThreshold}
+                onChange={e => onRebalancingThresholdChange(Number((e.target as HTMLInputElement).value))}
+                disabled={disableControls}
+                placeholder="Threshold"
+                size="compact"
+                overrides={{
+                  After: () => (
+                    <Block
+                      overrides={{
+                        Block: {
+                          style: {
+                            fontSize: '14px',
+                            color: '#6b7280',
+                            paddingRight: '8px',
+                            alignSelf: 'center'
+                          }
+                        }
+                      }}
+                    >
+                      %
+                    </Block>
+                  ),
+                }}
+                id="rebal-threshold-input"
+              />
             </Block>
           )}
         </>
