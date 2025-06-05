@@ -494,19 +494,21 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
     return Array.from(new Set(allDates)).sort();
   };
 
-  // const getLumpSumSeries = () => [
-  //   {
-  //     name: 'Portfolio Lump Sum XIRR',
-  //     data: (lumpSumXirrDatas['portfolio'] || []).sort((a, b) => a.date.getTime() - b.date.getTime()).map(row => row.xirr * 100),
-  //     type: 'line',
-  //     color: COLORS[0],
-  //     marker: { enabled: false },
-  //   }
-  // ];
-  // const getLumpSumCategories = () => {
-  //   const arr = lumpSumXirrDatas['portfolio'] || [];
-  //   return arr.map(row => formatDate(row.date));
-  // };
+  /*
+  const getLumpSumSeries = () => [
+    {
+      name: 'Portfolio Lump Sum XIRR',
+      data: (lumpSumXirrDatas['portfolio'] || []).sort((a: any, b: any) => a.date.getTime() - b.date.getTime()).map((row: any) => row.xirr * 100),
+      type: 'line',
+      color: COLORS[0],
+      marker: { enabled: false },
+    }
+  ];
+  const getLumpSumCategories = () => {
+    const arr = lumpSumXirrDatas['portfolio'] || [];
+    return arr.map((row: any) => formatDate(row.date));
+  };
+  */
 
   // Get all unique dates across all portfolios
   const getAllDates = () => {
@@ -553,20 +555,95 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
         <HighchartsReact
           highcharts={Highcharts}
           options={{
-            title: { text: 'Lump Sum Rolling 1Y' },
+            title: { 
+              text: `Lump Sum Rolling ${years}Y XIRR`,
+              style: {
+                fontSize: '18px',
+                fontWeight: '600',
+                color: '#1f2937',
+                fontFamily: 'system-ui, -apple-system, sans-serif'
+              }
+            },
             xAxis: {
               categories: getLumpSumCategories(),
-              title: { text: 'Date' },
-              labels: { rotation: -45 }
+              title: { 
+                text: 'Date',
+                style: {
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  color: '#6b7280',
+                  fontFamily: 'system-ui, -apple-system, sans-serif'
+                }
+              },
+              labels: { 
+                rotation: -45,
+                style: {
+                  fontSize: '12px',
+                  color: '#6b7280',
+                  fontFamily: 'system-ui, -apple-system, sans-serif'
+                }
+              },
+              gridLineColor: '#f3f4f6',
+              lineColor: '#e5e7eb',
+              tickColor: '#e5e7eb'
             },
             yAxis: {
-              title: { text: 'XIRR (%)' }
+              title: { 
+                text: 'XIRR (%)',
+                style: {
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  color: '#6b7280',
+                  fontFamily: 'system-ui, -apple-system, sans-serif'
+                }
+              },
+              labels: {
+                style: {
+                  fontSize: '12px',
+                  color: '#6b7280',
+                  fontFamily: 'system-ui, -apple-system, sans-serif'
+                }
+              },
+              gridLineColor: '#f3f4f6',
+              lineColor: '#e5e7eb'
             },
             series: getLumpSumSeries(),
-            chart: { height: 350 },
+            chart: { 
+              height: 400,
+              backgroundColor: '#ffffff',
+              borderRadius: 8,
+              spacing: [20, 20, 20, 20],
+              style: {
+                fontFamily: 'system-ui, -apple-system, sans-serif'
+              },
+              events: {
+                click: () => setModal(m => ({ ...m, visible: false })),
+              } 
+            },
             credits: { enabled: false },
-            legend: { enabled: true },
-            tooltip: { valueDecimals: 2 },
+            legend: { 
+              enabled: true,
+              itemStyle: {
+                fontSize: '13px',
+                fontWeight: '500',
+                color: '#374151',
+                fontFamily: 'system-ui, -apple-system, sans-serif'
+              },
+              itemHoverStyle: {
+                color: '#1f2937'
+              }
+            },
+            tooltip: { 
+              valueDecimals: 2,
+              backgroundColor: '#1f2937',
+              borderColor: '#1f2937',
+              borderRadius: 6,
+              style: {
+                color: '#ffffff',
+                fontSize: '12px',
+                fontFamily: 'system-ui, -apple-system, sans-serif'
+              }
+            },
           }}
         />
       </Block>
@@ -575,22 +652,95 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
         <HighchartsReact
           highcharts={Highcharts}
           options={{
-            title: { text: `SIP Rolling ${years}Y XIRR` },
+            title: { 
+              text: `SIP Rolling ${years}Y XIRR`,
+              style: {
+                fontSize: '18px',
+                fontWeight: '600',
+                color: '#1f2937',
+                fontFamily: 'system-ui, -apple-system, sans-serif'
+              }
+            },
             xAxis: {
               categories: getSipCategories(),
-              title: { text: 'Date' },
-              labels: { rotation: -45 }
+              title: { 
+                text: 'Date',
+                style: {
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  color: '#6b7280',
+                  fontFamily: 'system-ui, -apple-system, sans-serif'
+                }
+              },
+              labels: { 
+                rotation: -45,
+                style: {
+                  fontSize: '12px',
+                  color: '#6b7280',
+                  fontFamily: 'system-ui, -apple-system, sans-serif'
+                }
+              },
+              gridLineColor: '#f3f4f6',
+              lineColor: '#e5e7eb',
+              tickColor: '#e5e7eb'
             },
             yAxis: {
-              title: { text: 'XIRR (%)' }
+              title: { 
+                text: 'XIRR (%)',
+                style: {
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  color: '#6b7280',
+                  fontFamily: 'system-ui, -apple-system, sans-serif'
+                }
+              },
+              labels: {
+                style: {
+                  fontSize: '12px',
+                  color: '#6b7280',
+                  fontFamily: 'system-ui, -apple-system, sans-serif'
+                }
+              },
+              gridLineColor: '#f3f4f6',
+              lineColor: '#e5e7eb'
             },
             series: getSipSeries(),
-            chart: { height: 350, events: {
-              click: () => setModal(m => ({ ...m, visible: false })),
-            } },
+            chart: { 
+              height: 400,
+              backgroundColor: '#ffffff',
+              borderRadius: 8,
+              spacing: [20, 20, 20, 20],
+              style: {
+                fontFamily: 'system-ui, -apple-system, sans-serif'
+              },
+              events: {
+                click: () => setModal(m => ({ ...m, visible: false })),
+              } 
+            },
             credits: { enabled: false },
-            legend: { enabled: true },
-            tooltip: { valueDecimals: 2 },
+            legend: { 
+              enabled: true,
+              itemStyle: {
+                fontSize: '13px',
+                fontWeight: '500',
+                color: '#374151',
+                fontFamily: 'system-ui, -apple-system, sans-serif'
+              },
+              itemHoverStyle: {
+                color: '#1f2937'
+              }
+            },
+            tooltip: { 
+              valueDecimals: 2,
+              backgroundColor: '#1f2937',
+              borderColor: '#1f2937',
+              borderRadius: 6,
+              style: {
+                color: '#ffffff',
+                fontSize: '12px',
+                fontFamily: 'system-ui, -apple-system, sans-serif'
+              }
+            },
             plotOptions: {
               series: {
                 cursor: 'pointer',
