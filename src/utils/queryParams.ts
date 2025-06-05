@@ -44,14 +44,14 @@ export function getQueryParams() {
 }
 
 export function setQueryParams(portfolios: { selectedSchemes: (number | null)[]; allocations: number[]; rebalancingEnabled: boolean; rebalancingThreshold: number }[], years: number) {
-  const params = new URLSearchParams(window.location.search);
   const portfoliosStr = portfolios
     .map(p => {
       const fundsStr = p.selectedSchemes.map((scheme, idx) => `${scheme === null ? '' : scheme}:${p.allocations[idx]}`).join(',');
       return `${fundsStr}#${p.rebalancingEnabled ? '1' : '0'}#${p.rebalancingThreshold}`;
     })
     .join(';');
-  params.set('portfolios', portfoliosStr);
-  params.set('years', String(years));
-  window.history.replaceState({}, '', `?${params.toString()}`);
+  
+  // Construct URL manually to avoid encoding
+  const urlParams = `portfolios=${portfoliosStr}&years=${years}`;
+  window.history.replaceState({}, '', `?${urlParams}`);
 } 
