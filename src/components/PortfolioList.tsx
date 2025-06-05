@@ -43,17 +43,13 @@ export const PortfolioList: React.FC<PortfolioListProps> = ({
             position="relative"
             padding="scale700"
             marginBottom="scale600"
-            backgroundColor={pIdx % 2 === 0 ? "backgroundPrimary" : "backgroundSecondary"}
+            backgroundColor="backgroundPrimary"
             overrides={{
               Block: {
                 style: ({ $theme }) => ({
                   borderLeft: `4px solid ${$theme.colors.accent}`,
                   borderRadius: $theme.borders.radius200,
-                  transition: $theme.animation.timing200,
-                  ':hover': {
-                    borderLeftColor: $theme.colors.primary,
-                    backgroundColor: $theme.colors.backgroundTertiary
-                  }
+                  transition: $theme.animation.timing200
                 })
               }
             }}

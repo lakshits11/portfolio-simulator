@@ -3,7 +3,8 @@ import { Block } from 'baseui/block';
 import { Button } from 'baseui/button';
 import { Input } from 'baseui/input';
 import { FormControl } from 'baseui/form-control';
-import { LabelSmall } from 'baseui/typography';
+import { LabelSmall, LabelMedium } from 'baseui/typography';
+import { Select } from 'baseui/select';
 
 interface ControlsPanelProps {
   years: number;
@@ -37,32 +38,39 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
       }}
     >
       <Block display="flex" alignItems="center" justifyContent="flex-start" gridGap="scale400">
-        <FormControl label="Rolling Period (years):" caption={null}>
-          <Input
-            type="number"
-            min={1}
-            max={30}
-            value={years}
-            onChange={e => {
-              setYears(Math.max(1, Math.floor(Number((e.target as HTMLInputElement).value))));
-              onYearsChange();
+        <Block display="flex" alignItems="center" gridGap="scale300">
+          <LabelMedium>Rolling Period:</LabelMedium>
+          <Select
+            options={[
+              { label: '1 year', id: '1' },
+              { label: '2 years', id: '2' },
+              { label: '3 years', id: '3' },
+              { label: '5 years', id: '5' },
+              { label: '7 years', id: '7' },
+              { label: '10 years', id: '10' },
+              { label: '15 years', id: '15' },
+              { label: '20 years', id: '20' },
+            ]}
+            value={[{ label: `${years} year${years > 1 ? 's' : ''}`, id: years.toString() }]}
+            placeholder="Select years"
+            onChange={params => {
+              if (params.value.length > 0) {
+                setYears(parseInt(params.value[0].id as string));
+                onYearsChange();
+              }
             }}
             disabled={disabled}
+            size="compact"
             overrides={{
-              Root: { 
-                style: { 
-                  width: '80px'
-                } 
-              },
-              Input: {
+              Root: {
                 style: {
-                  textAlign: 'center'
+                  width: '120px'
                 }
               }
             }}
-            id="years-input"
+            clearable={false}
           />
-        </FormControl>
+        </Block>
         <Button
           kind="primary"
           onClick={onPlot}
