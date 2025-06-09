@@ -8,8 +8,8 @@ export function getQueryParams() {
   return {
     portfolios: portfoliosParam
       ? portfoliosParam.split(';').map(p_str => {
-          // Each p_str: scheme1:alloc1,scheme2:alloc2,...#rebalFlag#rebalThreshold
-          const parts = p_str.split('#');
+          // Each p_str: scheme1:alloc1,scheme2:alloc2,...|rebalFlag|rebalThreshold
+          const parts = p_str.split('|');
           const fundsStr = parts[0];
           const rebalFlagStr = parts[1]; 
           const rebalThresholdStr = parts[2];
@@ -47,11 +47,11 @@ export function setQueryParams(portfolios: { selectedSchemes: (number | null)[];
   const portfoliosStr = portfolios
     .map(p => {
       const fundsStr = p.selectedSchemes.map((scheme, idx) => `${scheme === null ? '' : scheme}:${p.allocations[idx]}`).join(',');
-      return `${fundsStr}#${p.rebalancingEnabled ? '1' : '0'}#${p.rebalancingThreshold}`;
+      return `${fundsStr}|${p.rebalancingEnabled ? '1' : '0'}|${p.rebalancingThreshold}`;
     })
     .join(';');
   
-  // Construct URL manually to avoid encoding
+  // Construct URL manually since we're using safe characters now
   const urlParams = `portfolios=${portfoliosStr}&years=${years}`;
   window.history.replaceState({}, '', `?${urlParams}`);
 } 
