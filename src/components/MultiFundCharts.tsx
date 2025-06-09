@@ -763,6 +763,9 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
               backgroundColor: '#ffffff',
               borderRadius: 8,
               spacing: [20, 20, 20, 20],
+              zooming: {
+                mouseWheel: false
+              },
               events: {
                 click: () => setModal(m => ({ ...m, visible: false })),
               } 
