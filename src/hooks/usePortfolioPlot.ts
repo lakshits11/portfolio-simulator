@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { fillMissingNavDates } from '../utils/fillMissingNavDates';
+import { indexService } from '../services/indexService';
 
 export function usePortfolioPlot({
   portfolios,
@@ -20,14 +21,49 @@ export function usePortfolioPlot({
       const allNavDatas: Record<string, any[][]> = {}; // key: portfolio index, value: array of nav arrays
       const allNavsFlat: Record<string, any[]> = {}; // for navDatas prop
       for (let pIdx = 0; pIdx < portfolios.length; ++pIdx) {
-        const schemes = portfolios[pIdx].selectedSchemes.filter(Boolean) as number[];
         const navs: any[][] = [];
-        for (const scheme of schemes) {
-          const nav = await loadNavData(scheme);
-          if (!Array.isArray(nav) || nav.length === 0) continue;
-          const filled = fillMissingNavDates(nav);
-          navs.push(filled);
-          allNavsFlat[`${pIdx}_${scheme}`] = filled;
+        
+        // Process instruments
+        if (portfolios[pIdx].selectedInstruments && portfolios[pIdx].selectedInstruments.length > 0) {
+          for (const instrument of portfolios[pIdx].selectedInstruments.filter(Boolean)) {
+            try {
+              let nav: any[] = [];
+              let identifier: string = '';
+              
+              if (instrument.type === 'mutual_fund') {
+                nav = await loadNavData(instrument.schemeCode);
+                identifier = `${pIdx}_${instrument.schemeCode}`;
+              } else if (instrument.type === 'index_fund') {
+                try {
+                  const indexData = await indexService.fetchIndexData(instrument.indexName);
+                  
+                  if (!indexData || indexData.length === 0) {
+                    continue;
+                  }
+                  
+                  // Convert index data to NAV format (keep Date objects for fillMissingNavDates)
+                  nav = indexData.map(item => ({
+                    date: item.date, // Keep as Date object
+                    nav: item.nav
+                  }));
+                  identifier = `${pIdx}_${instrument.indexName}`;
+                } catch (indexError) {
+                  console.error(`Failed to fetch index data for ${instrument.indexName}:`, indexError);
+                  continue;
+                }
+              }
+              
+              if (!Array.isArray(nav) || nav.length === 0) {
+                continue;
+              }
+              
+              const filled = fillMissingNavDates(nav);
+              navs.push(filled);
+              allNavsFlat[identifier] = filled;
+            } catch (error) {
+              console.error(`Error fetching data for instrument ${instrument.name}:`, error);
+            }
+          }
         }
         allNavDatas[pIdx] = navs;
       }

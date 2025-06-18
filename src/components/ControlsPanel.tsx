@@ -79,7 +79,9 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
               style: ({ $theme }) => ({
                 color: $theme.colors.contentSecondary,
                 marginLeft: $theme.sizing.scale200,
-                margin: 0
+                marginTop: 0,
+                marginBottom: 0,
+                marginRight: 0
               })
             }
           }}

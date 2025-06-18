@@ -29,7 +29,7 @@ const App: React.FC = () => {
     years,
     setYears,
     handleAddPortfolio,
-    handleFundSelect,
+    handleInstrumentSelect,
     handleAddFund,
     handleRemoveFund,
     handleAllocationChange,
@@ -61,10 +61,6 @@ const App: React.FC = () => {
   const handleAddPortfolioInvalidate = () => {
     invalidateChart();
     handleAddPortfolio();
-  };
-  const handleFundSelectInvalidate = (pIdx: number, idx: number, code: number) => {
-    invalidateChart();
-    handleFundSelect(pIdx, idx, code);
   };
   const handleAddFundInvalidate = (pIdx: number) => {
     invalidateChart();
@@ -135,8 +131,6 @@ const App: React.FC = () => {
                   overrides={{
                     BaseButton: {
                       style: ({ $theme }) => ({
-                        padding: '0.5rem 0.75rem',
-                        borderRadius: '6px',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '0.5rem',
@@ -156,7 +150,10 @@ const App: React.FC = () => {
                 portfolios={portfolios}
                 setPortfolios={setPortfolios}
                 funds={funds}
-                onFundSelect={handleFundSelectInvalidate}
+                onInstrumentSelect={(pIdx: number, idx: number, instrument) => {
+                  invalidateChart();
+                  handleInstrumentSelect(pIdx, idx, instrument);
+                }}
                 onAddFund={handleAddFundInvalidate}
                 onRemoveFund={handleRemoveFundInvalidate}
                 onAllocationChange={handleAllocationChangeInvalidate}
@@ -165,6 +162,8 @@ const App: React.FC = () => {
                 onAddPortfolio={handleAddPortfolioInvalidate}
                 disableControls={plotState.loadingNav || plotState.loadingXirr}
                 COLORS={plotState.COLORS}
+                useInstruments={true}
+                defaultSchemeCode={DEFAULT_SCHEME_CODE}
               />
 
               <ControlsPanel
@@ -187,7 +186,6 @@ const App: React.FC = () => {
               COLORS={plotState.COLORS}
               loadingNav={plotState.loadingNav}
               loadingXirr={plotState.loadingXirr}
-              portfolioSchemes={portfolios.map(p => p.selectedSchemes)}
               portfolios={portfolios}
               years={years}
             />

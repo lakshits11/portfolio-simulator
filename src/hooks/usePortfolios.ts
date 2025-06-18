@@ -2,6 +2,7 @@ import React from 'react';
 import { getQueryParams, setQueryParams } from '../utils/queryParams';
 import { getDefaultAllocations } from '../utils/getDefaultAllocations';
 import { Portfolio } from '../types/portfolio';
+import { Instrument } from '../types/instrument';
 
 const DEFAULT_REBALANCING_THRESHOLD = 5;
 
@@ -11,12 +12,12 @@ export function usePortfolios(DEFAULT_SCHEME_CODE: number) {
   const [portfolios, setPortfolios] = React.useState<Portfolio[]>(
     initialParams.portfolios && initialParams.portfolios.length > 0
       ? initialParams.portfolios.map((p: any) => ({
-          selectedSchemes: p.selectedSchemes && p.selectedSchemes.length > 0 ? p.selectedSchemes : [DEFAULT_SCHEME_CODE],
+          selectedInstruments: p.selectedInstruments || [null],
           allocations: p.allocations && p.allocations.length > 0 ? p.allocations : [100],
           rebalancingEnabled: typeof p.rebalancingEnabled === 'boolean' ? p.rebalancingEnabled : false,
           rebalancingThreshold: typeof p.rebalancingThreshold === 'number' ? p.rebalancingThreshold : DEFAULT_REBALANCING_THRESHOLD,
         }))
-      : [{ selectedSchemes: [DEFAULT_SCHEME_CODE], allocations: [100], rebalancingEnabled: false, rebalancingThreshold: DEFAULT_REBALANCING_THRESHOLD }]
+      : [{ selectedInstruments: [null], allocations: [100], rebalancingEnabled: false, rebalancingThreshold: DEFAULT_REBALANCING_THRESHOLD }]
   );
   const [years, setYears] = React.useState<number>(initialParams.years || 1);
 
@@ -24,36 +25,41 @@ export function usePortfolios(DEFAULT_SCHEME_CODE: number) {
   const handleAddPortfolio = () => {
     setPortfolios(prev => [
       ...prev,
-      { selectedSchemes: [DEFAULT_SCHEME_CODE], allocations: [100], rebalancingEnabled: false, rebalancingThreshold: DEFAULT_REBALANCING_THRESHOLD }
+      { selectedInstruments: [null], allocations: [100], rebalancingEnabled: false, rebalancingThreshold: DEFAULT_REBALANCING_THRESHOLD }
     ]);
   };
 
   // Handlers for fund controls per portfolio
-  const handleFundSelect = (portfolioIdx: number, idx: number, schemeCode: number) => {
-    setPortfolios(prev => prev.map((p, i) =>
-      i === portfolioIdx
-        ? { ...p, selectedSchemes: p.selectedSchemes.map((s, j) => j === idx ? schemeCode : s) }
-        : p
-    ));
+  const handleInstrumentSelect = (portfolioIdx: number, idx: number, instrument: Instrument | null) => {
+    setPortfolios(prev => prev.map((p, i) => {
+      if (i !== portfolioIdx) return p;
+      
+      const newInstruments = p.selectedInstruments.map((inst, j) => j === idx ? instrument : inst);
+
+      return { 
+        ...p, 
+        selectedInstruments: newInstruments
+      };
+    }));
   };
   const handleAddFund = (portfolioIdx: number) => {
     setPortfolios(prev => prev.map((p, i) => {
       if (i !== portfolioIdx) return p;
-      const newSchemes = [...p.selectedSchemes, DEFAULT_SCHEME_CODE];
+      const newInstruments = [...p.selectedInstruments, null];
       // Default: split using getDefaultAllocations
-      const n = newSchemes.length;
+      const n = newInstruments.length;
       const newAlloc = getDefaultAllocations(n);
-      return { ...p, selectedSchemes: newSchemes, allocations: newAlloc };
+      return { ...p, selectedInstruments: newInstruments, allocations: newAlloc };
     }));
   };
   const handleRemoveFund = (portfolioIdx: number, idx: number) => {
     setPortfolios(prev => prev.map((p, i) => {
       if (i !== portfolioIdx) return p;
-      const newSchemes = p.selectedSchemes.filter((_, j) => j !== idx);
+      const newInstruments = p.selectedInstruments.filter((_, j) => j !== idx);
       // Rebalance allocations for remaining funds
-      const n = newSchemes.length;
+      const n = newInstruments.length;
       const newAlloc = n > 0 ? getDefaultAllocations(n) : [];
-      return { ...p, selectedSchemes: newSchemes, allocations: newAlloc };
+      return { ...p, selectedInstruments: newInstruments, allocations: newAlloc };
     }));
   };
   const handleAllocationChange = (portfolioIdx: number, fundIdx: number, value: number) => {
@@ -91,7 +97,7 @@ export function usePortfolios(DEFAULT_SCHEME_CODE: number) {
     years,
     setYears,
     handleAddPortfolio,
-    handleFundSelect,
+    handleInstrumentSelect,
     handleAddFund,
     handleRemoveFund,
     handleAllocationChange,

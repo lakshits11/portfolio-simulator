@@ -68,7 +68,10 @@ export const LeftPanel: React.FC = () => {
                   width: '100%',
                   justifyContent: 'flex-start',
                   marginBottom: '0.5rem',
-                  padding: '0.75rem 1rem',
+                  paddingTop: '0.75rem',
+                  paddingBottom: '0.75rem',
+                  paddingLeft: '1rem',
+                  paddingRight: '1rem',
                   backgroundColor: $kind === 'primary' 
                     ? $theme.colors.primary 
                     : activeItem === item.id 

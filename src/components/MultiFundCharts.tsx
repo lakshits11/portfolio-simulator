@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Highcharts from 'highcharts/highstock';
 import HighchartsReact from 'highcharts-react-official';
 import { mfapiMutualFund } from '../types/mfapiMutualFund';
+import { Portfolio } from '../types/portfolio';
 import { Block } from 'baseui/block';
 import { Button } from 'baseui/button';
 import { HeadingMedium, LabelLarge, LabelMedium, LabelSmall } from 'baseui/typography';
@@ -16,8 +17,7 @@ interface MultiFundChartsProps {
   sipXirrDatas: Record<string, any[]>;
   funds: mfapiMutualFund[];
   COLORS: string[];
-  portfolioSchemes: (number | null)[][];
-  portfolios: { selectedSchemes: (number | null)[] }[];
+  portfolios: Portfolio[];
   years: number;
 }
 
@@ -463,7 +463,6 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
   sipXirrDatas,
   funds,
   COLORS,
-  portfolioSchemes,
   portfolios,
   years,
 }) => {
@@ -549,10 +548,13 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
   // Helper to get the funds for a portfolio by name (e.g., 'Portfolio 1')
   const getPortfolioFunds = (portfolioName: string): mfapiMutualFund[] => {
     const idx = parseInt(portfolioName.replace('Portfolio ', '')) - 1;
-    const schemeCodes = portfolioSchemes[idx] || [];
-    return schemeCodes
-      .filter((code): code is number => code !== null && code !== undefined)
-      .map(code => funds.find(f => f.schemeCode === code)).filter(Boolean) as mfapiMutualFund[];
+    const portfolio = portfolios[idx];
+    if (!portfolio || !portfolio.selectedInstruments) return [];
+    
+    return portfolio.selectedInstruments
+      .filter(inst => inst && inst.type === 'mutual_fund')
+      .map(inst => funds.find(f => f.schemeCode === inst!.schemeCode))
+      .filter(Boolean) as mfapiMutualFund[];
   };
 
   return (

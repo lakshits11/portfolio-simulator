@@ -1,16 +1,18 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from 'baseui/button';
 import { Input } from 'baseui/input';
 import { Checkbox } from 'baseui/checkbox';
 import { Block } from 'baseui/block';
 import { FormControl } from 'baseui/form-control';
-import { MutualFundDropdown } from './MutualFundDropdown';
+import { InstrumentTypeDropdown } from './InstrumentTypeDropdown';
+import { InstrumentDropdown } from './InstrumentDropdown';
+import { InstrumentType, Instrument } from '../types/instrument';
 
 interface FundControlsProps {
-  selectedSchemes: (number | null)[];
+  selectedInstruments: (Instrument | null)[];
   allocations: (number | null)[];
   funds: { schemeCode: number; schemeName: string }[];
-  onFundSelect: (idx: number, code: number) => void;
+  onInstrumentSelect: (idx: number, instrument: Instrument | null) => void;
   onAddFund: () => void;
   onRemoveFund: (idx: number) => void;
   onAllocationChange: (idx: number, value: number) => void;
@@ -19,13 +21,15 @@ interface FundControlsProps {
   onToggleRebalancing: () => void;
   rebalancingThreshold: number;
   onRebalancingThresholdChange: (value: number) => void;
+  useInstruments?: boolean;
+  defaultSchemeCode?: number;
 }
 
 export const FundControls: React.FC<FundControlsProps> = ({
-  selectedSchemes,
+  selectedInstruments,
   allocations,
   funds,
-  onFundSelect,
+  onInstrumentSelect,
   onAddFund,
   onRemoveFund,
   onAllocationChange,
@@ -34,14 +38,64 @@ export const FundControls: React.FC<FundControlsProps> = ({
   onToggleRebalancing,
   rebalancingThreshold,
   onRebalancingThresholdChange,
-}) => (
+  useInstruments = true, // Default to true since we're only using instruments now
+  defaultSchemeCode,
+}) => {
+  const [instrumentTypes, setInstrumentTypes] = useState<InstrumentType[]>(() => {
+    return selectedInstruments.map(() => 'mutual_fund' as InstrumentType);
+  });
+
+  // Update instrumentTypes when selectedInstruments changes
+  useEffect(() => {
+    setInstrumentTypes(prev => {
+      const newTypes = selectedInstruments.map((_, idx) => prev[idx] || 'mutual_fund' as InstrumentType);
+      return newTypes;
+    });
+  }, [selectedInstruments]);
+
+  const handleInstrumentTypeChange = (idx: number, type: InstrumentType) => {
+    const newTypes = [...instrumentTypes];
+    newTypes[idx] = type;
+    setInstrumentTypes(newTypes);
+    
+    // Clear the current selection and set default when switching types
+    if (type === 'mutual_fund') {
+      // Find the default UTI Nifty 50 fund or use first available fund
+      const defaultFund = funds.find(f => f.schemeName.toLowerCase().includes('uti nifty 50')) || funds[0];
+      if (defaultFund) {
+        const defaultInstrument: Instrument = {
+          type: 'mutual_fund',
+          id: defaultFund.schemeCode,
+          name: defaultFund.schemeName,
+          schemeCode: defaultFund.schemeCode,
+          schemeName: defaultFund.schemeName
+        };
+        onInstrumentSelect(idx, defaultInstrument);
+      }
+    } else {
+      // For index funds, clear the selection (user needs to select manually)
+      onInstrumentSelect(idx, null);
+    }
+  };
+
+  return (
   <>
-    {selectedSchemes.map((scheme, idx) => (
+    {selectedInstruments?.map((item, idx) => (
       <Block key={idx} display="flex" alignItems="center" marginBottom="scale200" gridGap="scale300">
-        <MutualFundDropdown
-          funds={funds.filter(f => !selectedSchemes.includes(f.schemeCode) || f.schemeCode === scheme)}
-          onSelect={code => onFundSelect(idx, code)}
-          value={scheme ?? undefined}
+        <InstrumentTypeDropdown
+          value={instrumentTypes[idx] || 'mutual_fund'}
+          onChange={(type) => handleInstrumentTypeChange(idx, type)}
+        />
+        <InstrumentDropdown
+          instrumentType={instrumentTypes[idx] || 'mutual_fund'}
+          funds={funds.filter(f => 
+            selectedInstruments.every((inst, i) => 
+              i === idx || !inst || inst.type !== 'mutual_fund' || inst.id !== f.schemeCode
+            )
+          )}
+          onSelect={(instrument) => onInstrumentSelect(idx, instrument)}
+          value={selectedInstruments?.[idx] ?? undefined}
+          defaultSchemeCode={defaultSchemeCode}
         />
         <Input
           type="number"
@@ -80,7 +134,7 @@ export const FundControls: React.FC<FundControlsProps> = ({
           kind="tertiary"
           size="mini"
           onClick={() => onRemoveFund(idx)}
-          disabled={disableControls || selectedSchemes.length <= 1}
+          disabled={disableControls || (selectedInstruments?.length ?? 0) <= 1}
           overrides={{
             BaseButton: {
               style: ({ $theme }) => ({
@@ -108,9 +162,9 @@ export const FundControls: React.FC<FundControlsProps> = ({
         onClick={onAddFund}
         disabled={disableControls}
       >
-        + Fund
+        + Instrument
       </Button>
-      {selectedSchemes.length > 1 && (
+      {(selectedInstruments?.length ?? 0) > 1 && (
         <>
           <Checkbox
             checked={rebalancingEnabled}
@@ -156,4 +210,5 @@ export const FundControls: React.FC<FundControlsProps> = ({
       )}
     </Block>
   </>
-); 
+  );
+}; 

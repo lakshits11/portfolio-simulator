@@ -1,6 +1,7 @@
 import React from 'react';
 import { MultiFundCharts } from './MultiFundCharts';
 import { mfapiMutualFund } from '../types/mfapiMutualFund';
+import { Portfolio } from '../types/portfolio';
 import { LoadingSpinner } from './LoadingSpinner';
 import { Block } from 'baseui/block';
 import { LabelMedium } from 'baseui/typography';
@@ -15,8 +16,7 @@ interface ChartAreaProps {
   COLORS: string[];
   loadingNav?: boolean;
   loadingXirr?: boolean;
-  portfolioSchemes: (number | null)[][];
-  portfolios: { selectedSchemes: (number | null)[] }[];
+  portfolios: Portfolio[];
   years: number;
 }
 
@@ -30,7 +30,6 @@ export const ChartArea: React.FC<ChartAreaProps> = ({
   COLORS,
   loadingNav = false,
   loadingXirr = false,
-  portfolioSchemes,
   portfolios,
   years,
 }) => (
@@ -86,7 +85,6 @@ export const ChartArea: React.FC<ChartAreaProps> = ({
             sipXirrDatas={sipXirrDatas}
             funds={funds}
             COLORS={COLORS}
-            portfolioSchemes={portfolioSchemes}
             portfolios={portfolios}
             years={years}
           />

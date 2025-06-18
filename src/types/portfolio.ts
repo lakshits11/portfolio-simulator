@@ -1,5 +1,7 @@
+import { Instrument } from './instrument';
+
 export interface Portfolio {
-  selectedSchemes: (number | null)[];
+  selectedInstruments: (Instrument | null)[];
   allocations: number[];
   rebalancingEnabled: boolean;
   rebalancingThreshold: number;

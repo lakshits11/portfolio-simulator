@@ -5,12 +5,13 @@ import { LabelLarge, LabelSmall } from 'baseui/typography';
 import { FundControls } from './FundControls';
 import { mfapiMutualFund } from '../types/mfapiMutualFund';
 import { Portfolio } from '../types/portfolio';
+import { Instrument } from '../types/instrument';
 
 interface PortfolioListProps {
   portfolios: Portfolio[];
   setPortfolios: React.Dispatch<React.SetStateAction<Portfolio[]>>;
   funds: mfapiMutualFund[];
-  onFundSelect: (pIdx: number, idx: number, code: number) => void;
+  onInstrumentSelect: (pIdx: number, idx: number, instrument: Instrument | null) => void;
   onAddFund: (pIdx: number) => void;
   onRemoveFund: (pIdx: number, idx: number) => void;
   onAllocationChange: (pIdx: number, idx: number, value: number) => void;
@@ -19,13 +20,15 @@ interface PortfolioListProps {
   onAddPortfolio: () => void;
   disableControls: boolean;
   COLORS: string[];
+  useInstruments?: boolean;
+  defaultSchemeCode?: number;
 }
 
 export const PortfolioList: React.FC<PortfolioListProps> = ({
   portfolios,
   setPortfolios,
   funds,
-  onFundSelect,
+  onInstrumentSelect,
   onAddFund,
   onRemoveFund,
   onAllocationChange,
@@ -33,7 +36,9 @@ export const PortfolioList: React.FC<PortfolioListProps> = ({
   onRebalancingThresholdChange,
   onAddPortfolio,
   disableControls,
-  COLORS
+  COLORS,
+  useInstruments = false,
+  defaultSchemeCode
 }) => {
   return (
     <Block marginBottom="scale800">
@@ -97,10 +102,10 @@ export const PortfolioList: React.FC<PortfolioListProps> = ({
             </Block>
             
             <FundControls
-              selectedSchemes={portfolio.selectedSchemes}
+              selectedInstruments={portfolio.selectedInstruments || []}
               allocations={portfolio.allocations}
               funds={funds}
-              onFundSelect={(idx, code) => onFundSelect(pIdx, idx, code)}
+              onInstrumentSelect={(idx, instrument) => onInstrumentSelect(pIdx, idx, instrument)}
               onAddFund={() => onAddFund(pIdx)}
               onRemoveFund={idx => onRemoveFund(pIdx, idx)}
               onAllocationChange={(idx, value) => onAllocationChange(pIdx, idx, value)}
@@ -109,6 +114,8 @@ export const PortfolioList: React.FC<PortfolioListProps> = ({
               onToggleRebalancing={() => onToggleRebalancing(pIdx)}
               rebalancingThreshold={portfolio.rebalancingThreshold}
               onRebalancingThresholdChange={value => onRebalancingThresholdChange(pIdx, value)}
+              useInstruments={useInstruments}
+              defaultSchemeCode={defaultSchemeCode}
             />
             
             {allocationSum !== 100 && (
