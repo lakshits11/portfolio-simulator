@@ -225,6 +225,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ visible, onC
             rows={rows}
             emptyMessage="No transactions to display"
             loadingMessage="Loading..."
+            searchable={false}
+            filterable={false}
           />
         </div>
       </div>
