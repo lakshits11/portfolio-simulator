@@ -1,4 +1,12 @@
 import React, { useRef, useEffect } from 'react';
+import {
+  StatefulDataTable,
+  StringColumn,
+  CategoricalColumn,
+  NumericalColumn,
+  NUMERICAL_FORMATS,
+} from "baseui/data-table";
+import { useStyletron } from 'baseui';
 
 function formatDate(date: Date): string {
   return date.toISOString().slice(0, 10);
@@ -14,7 +22,11 @@ interface TransactionModalProps {
   funds: Array<{ schemeName: string; type: 'mutual_fund' | 'index_fund' }>;
 }
 
+// Define the row data type for the DataTable
+type TransactionRowDataT = [string, string, string, number, number, number, string];
+
 export const TransactionModal: React.FC<TransactionModalProps> = ({ visible, onClose, transactions, date, xirr, portfolioName, funds }) => {
+  const [css] = useStyletron();
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -56,6 +68,90 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ visible, onC
     return fundA.localeCompare(fundB);
   });
 
+  // Convert transactions to DataTable format
+  const rows = sortedTxs.map((tx, idx) => {
+    const fundName = funds[tx.fundIdx]?.schemeName || `Fund ${tx.fundIdx + 1}`;
+    const allocationText = ((tx.type as string) === 'buy' || (tx.type as string) === 'rebalance') && tx.allocationPercentage !== undefined 
+      ? `${tx.allocationPercentage.toFixed(2)}%` 
+      : '';
+    
+    return {
+      id: String(idx),
+      data: [
+        fundName,
+        transactionTypeDisplay[tx.type] || '',
+        formatDate(tx.when),
+        tx.nav,
+        tx.units,
+        tx.amount,
+        allocationText,
+      ] as TransactionRowDataT,
+    };
+  });
+
+  const formatNumber = (num: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(num);
+  };
+
+  const formatNav = (num: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(num);
+  };
+
+  const formatUnits = (num: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      minimumFractionDigits: 4,
+      maximumFractionDigits: 4,
+    }).format(num);
+  };
+
+  // Define columns for the DataTable
+  const columns = [
+    StringColumn({
+      title: "Fund",
+      mapDataToValue: (data: TransactionRowDataT) => data[0],
+      cellBlockAlign: 'start',
+    }),
+    CategoricalColumn({
+      title: "Type",
+      mapDataToValue: (data: TransactionRowDataT) => data[1],
+      cellBlockAlign: 'start',
+    }),
+    StringColumn({
+      title: "Date",
+      mapDataToValue: (data: TransactionRowDataT) => data[2],
+      cellBlockAlign: 'start',
+    }),
+    NumericalColumn({
+      title: "NAV",
+      format: formatNav,
+      mapDataToValue: (data: TransactionRowDataT) => data[3],
+      cellBlockAlign: 'end',
+    }),
+    NumericalColumn({
+      title: "Units",
+      format: formatUnits,
+      mapDataToValue: (data: TransactionRowDataT) => data[4],
+      cellBlockAlign: 'end',
+    }),
+    NumericalColumn({
+      title: "Amount",
+      format: formatNumber,
+      mapDataToValue: (data: TransactionRowDataT) => data[5],
+      cellBlockAlign: 'end',
+    }),
+    StringColumn({
+      title: "Allocation %",
+      mapDataToValue: (data: TransactionRowDataT) => data[6],
+      cellBlockAlign: 'end',
+    }),
+  ];
+
   if (!visible) return null;
 
   return (
@@ -77,8 +173,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ visible, onC
           background: 'white',
           padding: '1.5rem',
           borderRadius: '8px',
-          minWidth: '540px',
-          maxWidth: '98vw',
+          width: '90vw',
+          maxWidth: '1200px',
           maxHeight: '80vh',
           overflowY: 'auto',
           boxShadow: '0 2px 16px rgba(0,0,0,0.2)',
@@ -115,38 +211,21 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ visible, onC
           <strong>Transactions:</strong>
         </div>
         
-        <div style={{ overflowX: 'auto' }}>
-          <table>
-            <thead>
-              <tr>
-                <th>Fund</th>
-                <th>Type</th>
-                <th>Date</th>
-                <th>NAV</th>
-                <th>Units</th>
-                <th>Amount</th>
-                <th>Allocation %</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedTxs.map((tx, idx) => {
-                const fundName = funds[tx.fundIdx]?.schemeName || `Fund ${tx.fundIdx + 1}`;
-                return (
-                  <tr key={idx}>
-                    <td>{fundName}</td>
-                    <td>{transactionTypeDisplay[tx.type] || ''}</td>
-                    <td>{formatDate(tx.when)}</td>
-                    <td>{tx.nav.toFixed(2)}</td>
-                    <td>{tx.units.toFixed(4)}</td>
-                    <td>{tx.amount.toFixed(2)}</td>
-                    <td>
-                      {((tx.type as string) === 'buy' || (tx.type as string) === 'rebalance') && tx.allocationPercentage !== undefined ? `${tx.allocationPercentage.toFixed(2)}%` : ''}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div className={css({
+          height: '400px',
+          width: '100%',
+          '.data-table': {
+            width: '100%',
+            display: 'table',
+            tableLayout: 'fixed'
+          }
+        })}>
+          <StatefulDataTable
+            columns={columns}
+            rows={rows}
+            emptyMessage="No transactions to display"
+            loadingMessage="Loading..."
+          />
         </div>
       </div>
     </div>
