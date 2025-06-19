@@ -1,7 +1,4 @@
 import React, { useRef, useEffect } from 'react';
-import { Block } from 'baseui/block';
-import { Button } from 'baseui/button';
-import { HeadingMedium, LabelLarge, LabelMedium, LabelSmall } from 'baseui/typography';
 
 function formatDate(date: Date): string {
   return date.toISOString().slice(0, 10);
@@ -60,386 +57,98 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ visible, onC
   });
 
   if (!visible) return null;
+
   return (
-    <Block
-      position="fixed"
-      top="0"
-      left="0"
-      right="0"
-      bottom="0"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      overrides={{
-        Block: {
-          style: {
-            background: 'rgba(0,0,0,0.3)',
-            zIndex: 1000
-          }
-        }
-      }}
-    >
-      <Block
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'rgba(0,0,0,0.3)',
+      zIndex: 1000
+    }}>
+      <div
         ref={modalRef}
-        backgroundColor="white"
-        padding="1.5rem"
-        position="relative"
-        overrides={{
-          Block: {
-            style: {
-              borderRadius: '8px',
-              minWidth: '540px',
-              maxWidth: '98vw',
-              maxHeight: '80vh',
-              overflowY: 'auto',
-              boxShadow: '0 2px 16px rgba(0,0,0,0.2)'
-            }
-          }
+        style={{
+          background: 'white',
+          padding: '1.5rem',
+          borderRadius: '8px',
+          minWidth: '540px',
+          maxWidth: '98vw',
+          maxHeight: '80vh',
+          overflowY: 'auto',
+          boxShadow: '0 2px 16px rgba(0,0,0,0.2)',
+          position: 'relative'
         }}
       >
-        <Button
+        <button
           onClick={onClose}
-          kind="tertiary"
-          size="compact"
-          overrides={{
-            BaseButton: {
-              style: {
-                position: 'absolute',
-                top: '8px',
-                right: '12px',
-                background: 'none',
-                border: 'none',
-                fontSize: '22px',
-                color: '#888',
-                cursor: 'pointer',
-                padding: '0',
-                lineHeight: '1',
-                ':hover': {
-                  color: '#ef4444'
-                }
-              }
-            }
+          style={{
+            position: 'absolute',
+            top: '8px',
+            right: '12px',
+            background: 'none',
+            border: 'none',
+            fontSize: '22px',
+            color: '#888',
+            cursor: 'pointer',
+            padding: '0',
+            lineHeight: '1'
           }}
         >
           &times;
-        </Button>
+        </button>
         
-        <HeadingMedium
-          overrides={{
-            Block: {
-              style: {
-                marginTop: 0,
-                marginBottom: '1rem'
-              }
-            }
-          }}
-        >
+        <h3 style={{ marginTop: 0, marginBottom: '1rem' }}>
           {portfolioName} - {date}
-        </HeadingMedium>
+        </h3>
         
-        <Block marginBottom="0.5rem">
-          <LabelMedium>
-            XIRR: <strong>{(xirr * 100).toFixed(2)}%</strong>
-          </LabelMedium>
-        </Block>
+        <div style={{ marginBottom: '0.5rem' }}>
+          XIRR: <strong>{(xirr * 100).toFixed(2)}%</strong>
+        </div>
         
-        <Block marginBottom="1rem">
-          <LabelLarge
-            overrides={{
-              Block: {
-                style: {
-                  fontWeight: 'bold',
-                  margin: 0
-                }
-              }
-            }}
-          >
-            Transactions:
-          </LabelLarge>
-        </Block>
+        <div style={{ marginBottom: '1rem' }}>
+          <strong>Transactions:</strong>
+        </div>
         
-        <Block 
-          width="100%" 
-          overrides={{
-            Block: {
-              style: {
-                overflowX: 'auto'
-              }
-            }
-          }}
-        >
-          <Block minWidth="900px">
-            {/* Table Header */}
-            <Block 
-              display="flex" 
-              padding="0.375rem 0.5rem"
-              overrides={{
-                Block: {
-                  style: {
-                    background: '#f5f5f5',
-                    border: '1px solid #ccc',
-                    borderBottom: 'none'
-                  }
-                }
-              }}
-            >
-              <Block width="25%" padding="0 0.25rem">
-                <LabelSmall
-                  overrides={{
-                    Block: {
-                      style: {
-                        fontWeight: 'bold',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        margin: 0
-                      }
-                    }
-                  }}
-                >
-                  Fund
-                </LabelSmall>
-              </Block>
-              <Block width="10%" padding="0 0.25rem">
-                <LabelSmall
-                  overrides={{
-                    Block: {
-                      style: {
-                        fontWeight: 'bold',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        margin: 0
-                      }
-                    }
-                  }}
-                >
-                  Type
-                </LabelSmall>
-              </Block>
-              <Block width="12%" padding="0 0.25rem">
-                <LabelSmall
-                  overrides={{
-                    Block: {
-                      style: {
-                        fontWeight: 'bold',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        margin: 0
-                      }
-                    }
-                  }}
-                >
-                  Date
-                </LabelSmall>
-              </Block>
-              <Block width="10%" padding="0 0.25rem">
-                <LabelSmall
-                  overrides={{
-                    Block: {
-                      style: {
-                        fontWeight: 'bold',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        margin: 0
-                      }
-                    }
-                  }}
-                >
-                  NAV
-                </LabelSmall>
-              </Block>
-              <Block width="12%" padding="0 0.25rem">
-                <LabelSmall
-                  overrides={{
-                    Block: {
-                      style: {
-                        fontWeight: 'bold',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        margin: 0
-                      }
-                    }
-                  }}
-                >
-                  Units
-                </LabelSmall>
-              </Block>
-              <Block width="12%" padding="0 0.25rem">
-                <LabelSmall
-                  overrides={{
-                    Block: {
-                      style: {
-                        fontWeight: 'bold',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        margin: 0
-                      }
-                    }
-                  }}
-                >
-                  Amount
-                </LabelSmall>
-              </Block>
-              <Block width="19%" padding="0 0.25rem">
-                <LabelSmall
-                  overrides={{
-                    Block: {
-                      style: {
-                        fontWeight: 'bold',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        margin: 0
-                      }
-                    }
-                  }}
-                >
-                  Allocation %
-                </LabelSmall>
-              </Block>
-            </Block>
-
-            {/* Table Rows */}
-            {sortedTxs.map((tx, idx) => {
-              const fundName = funds[tx.fundIdx]?.schemeName || `Fund ${tx.fundIdx + 1}`;
-              return (
-                <Block 
-                  key={idx}
-                  display="flex" 
-                  padding="0.375rem 0.5rem"
-                  overrides={{
-                    Block: {
-                      style: {
-                        background: idx % 2 === 0 ? '#fff' : '#f9f9f9',
-                        border: '1px solid #ccc',
-                        borderTop: 'none'
-                      }
-                    }
-                  }}
-                >
-                  <Block width="25%" padding="0 0.25rem">
-                    <LabelSmall
-                      overrides={{
-                        Block: {
-                          style: {
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            margin: 0
-                          }
-                        }
-                      }}
-                    >
-                      {fundName}
-                    </LabelSmall>
-                  </Block>
-                  <Block width="10%" padding="0 0.25rem">
-                    <LabelSmall
-                      overrides={{
-                        Block: {
-                          style: {
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            margin: 0
-                          }
-                        }
-                      }}
-                    >
-                      {transactionTypeDisplay[tx.type] || ''}
-                    </LabelSmall>
-                  </Block>
-                  <Block width="12%" padding="0 0.25rem">
-                    <LabelSmall
-                      overrides={{
-                        Block: {
-                          style: {
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            margin: 0
-                          }
-                        }
-                      }}
-                    >
-                      {formatDate(tx.when)}
-                    </LabelSmall>
-                  </Block>
-                  <Block width="10%" padding="0 0.25rem">
-                    <LabelSmall
-                      overrides={{
-                        Block: {
-                          style: {
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            margin: 0
-                          }
-                        }
-                      }}
-                    >
-                      {tx.nav.toFixed(2)}
-                    </LabelSmall>
-                  </Block>
-                  <Block width="12%" padding="0 0.25rem">
-                    <LabelSmall
-                      overrides={{
-                        Block: {
-                          style: {
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            margin: 0
-                          }
-                        }
-                      }}
-                    >
-                      {tx.units.toFixed(4)}
-                    </LabelSmall>
-                  </Block>
-                  <Block width="12%" padding="0 0.25rem">
-                    <LabelSmall
-                      overrides={{
-                        Block: {
-                          style: {
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            margin: 0
-                          }
-                        }
-                      }}
-                    >
-                      {tx.amount.toFixed(2)}
-                    </LabelSmall>
-                  </Block>
-                  <Block width="19%" padding="0 0.25rem">
-                    <LabelSmall
-                      overrides={{
-                        Block: {
-                          style: {
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            margin: 0
-                          }
-                        }
-                      }}
-                    >
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ minWidth: '900px', borderCollapse: 'collapse', width: '100%' }}>
+            <thead>
+              <tr style={{ background: '#f5f5f5' }}>
+                <th style={{ padding: '0.375rem 0.5rem', textAlign: 'left', border: '1px solid #ccc' }}>Fund</th>
+                <th style={{ padding: '0.375rem 0.5rem', textAlign: 'left', border: '1px solid #ccc' }}>Type</th>
+                <th style={{ padding: '0.375rem 0.5rem', textAlign: 'left', border: '1px solid #ccc' }}>Date</th>
+                <th style={{ padding: '0.375rem 0.5rem', textAlign: 'left', border: '1px solid #ccc' }}>NAV</th>
+                <th style={{ padding: '0.375rem 0.5rem', textAlign: 'left', border: '1px solid #ccc' }}>Units</th>
+                <th style={{ padding: '0.375rem 0.5rem', textAlign: 'left', border: '1px solid #ccc' }}>Amount</th>
+                <th style={{ padding: '0.375rem 0.5rem', textAlign: 'left', border: '1px solid #ccc' }}>Allocation %</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedTxs.map((tx, idx) => {
+                const fundName = funds[tx.fundIdx]?.schemeName || `Fund ${tx.fundIdx + 1}`;
+                return (
+                  <tr key={idx} style={{ background: idx % 2 === 0 ? '#fff' : '#f9f9f9' }}>
+                    <td style={{ padding: '0.375rem 0.5rem', border: '1px solid #ccc' }}>{fundName}</td>
+                    <td style={{ padding: '0.375rem 0.5rem', border: '1px solid #ccc' }}>{transactionTypeDisplay[tx.type] || ''}</td>
+                    <td style={{ padding: '0.375rem 0.5rem', border: '1px solid #ccc' }}>{formatDate(tx.when)}</td>
+                    <td style={{ padding: '0.375rem 0.5rem', border: '1px solid #ccc' }}>{tx.nav.toFixed(2)}</td>
+                    <td style={{ padding: '0.375rem 0.5rem', border: '1px solid #ccc' }}>{tx.units.toFixed(4)}</td>
+                    <td style={{ padding: '0.375rem 0.5rem', border: '1px solid #ccc' }}>{tx.amount.toFixed(2)}</td>
+                    <td style={{ padding: '0.375rem 0.5rem', border: '1px solid #ccc' }}>
                       {((tx.type as string) === 'buy' || (tx.type as string) === 'rebalance') && tx.allocationPercentage !== undefined ? `${tx.allocationPercentage.toFixed(2)}%` : ''}
-                    </LabelSmall>
-                  </Block>
-                </Block>
-              );
-            })}
-          </Block>
-        </Block>
-      </Block>
-    </Block>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   );
 }; 
