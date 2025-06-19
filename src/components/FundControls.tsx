@@ -42,13 +42,16 @@ export const FundControls: React.FC<FundControlsProps> = ({
   defaultSchemeCode,
 }) => {
   const [instrumentTypes, setInstrumentTypes] = useState<InstrumentType[]>(() => {
-    return selectedInstruments.map(() => 'mutual_fund' as InstrumentType);
+    return selectedInstruments.map(inst => inst?.type || 'mutual_fund' as InstrumentType);
   });
 
   // Update instrumentTypes when selectedInstruments changes
   useEffect(() => {
     setInstrumentTypes(prev => {
-      const newTypes = selectedInstruments.map((_, idx) => prev[idx] || 'mutual_fund' as InstrumentType);
+      const newTypes = selectedInstruments.map((inst, idx) => {
+        // If instrument exists, use its type; otherwise keep previous type or default to mutual_fund
+        return inst?.type || prev[idx] || 'mutual_fund' as InstrumentType;
+      });
       return newTypes;
     });
   }, [selectedInstruments]);

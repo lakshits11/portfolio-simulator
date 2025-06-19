@@ -10,20 +10,50 @@ export function getQueryParams() {
   return {
     portfolios: portfoliosParam
       ? portfoliosParam.split(';').map(p_str => {
-          // Legacy format: scheme1:alloc1,scheme2:alloc2,...|rebalFlag|rebalThreshold
-          // For now, we'll parse legacy format but return empty selectedInstruments
+          // Format: instrument1:alloc1,instrument2:alloc2,...|rebalFlag|rebalThreshold
+          // instrument format: type:id:allocation (e.g., mf:120716:50 or idx:NIFTY50:50)
           const parts = p_str.split('|');
-          const fundsStr = parts[0];
+          const instrumentsStr = parts[0];
           const rebalFlagStr = parts[1]; 
           const rebalThresholdStr = parts[2];
 
+          const selectedInstruments: (any | null)[] = [];
           const allocations: number[] = [];
 
-          if (fundsStr) {
-            fundsStr.split(',').forEach(pair => {
-              const [, allocStr] = pair.split(':');
-              const alloc = Number(allocStr);
-              allocations.push(isNaN(alloc) ? 0 : alloc);
+          if (instrumentsStr) {
+            instrumentsStr.split(',').forEach(instrumentData => {
+              const instrumentParts = instrumentData.split(':');
+              
+              if (instrumentParts.length >= 2) {
+                const type = instrumentParts[0];
+                const alloc = Number(instrumentParts[instrumentParts.length - 1]);
+                allocations.push(isNaN(alloc) ? 0 : alloc);
+                
+                if (type === 'null') {
+                  selectedInstruments.push(null);
+                } else if (type === 'mf' && instrumentParts.length >= 3) {
+                  const schemeCode = Number(instrumentParts[1]);
+                  selectedInstruments.push({
+                    type: 'mutual_fund',
+                    id: schemeCode,
+                    name: `Scheme ${schemeCode}`, // Will be updated by component
+                    schemeCode: schemeCode,
+                    schemeName: `Scheme ${schemeCode}` // Will be updated by component
+                  });
+                } else if (type === 'idx' && instrumentParts.length >= 3) {
+                  // Convert underscores back to spaces
+                  const indexName = instrumentParts[1].replace(/_/g, ' ');
+                  selectedInstruments.push({
+                    type: 'index_fund',
+                    id: indexName,
+                    name: indexName,
+                    indexName: indexName,
+                    displayName: indexName
+                  });
+                } else {
+                  selectedInstruments.push(null);
+                }
+              }
             });
           }
           
@@ -32,7 +62,7 @@ export function getQueryParams() {
           const rebalancingThreshold = rebalThresholdStr ? parseInt(rebalThresholdStr, 10) : defaultThreshold;
           
           return {
-            selectedInstruments: allocations.map(() => null), // Start with null instruments, let user select
+            selectedInstruments,
             allocations,
             rebalancingEnabled,
             rebalancingThreshold: isNaN(rebalancingThreshold) ? defaultThreshold : rebalancingThreshold
@@ -44,12 +74,28 @@ export function getQueryParams() {
 }
 
 export function setQueryParams(portfolios: Portfolio[], years: number) {
-  // For simplicity, we'll store a minimal representation
-  // Format: alloc1,alloc2,...|rebalFlag|rebalThreshold
+  // Format: instrument1:alloc1,instrument2:alloc2,...|rebalFlag|rebalThreshold
+  // instrument format: type:id (e.g., mf:120716 or idx:NIFTY50)
   const portfoliosStr = portfolios
     .map(p => {
-      const allocStr = p.allocations.join(',');
-      return `${allocStr}|${p.rebalancingEnabled ? '1' : '0'}|${p.rebalancingThreshold}`;
+      const instrumentsStr = p.selectedInstruments
+        .map((inst, idx) => {
+          const allocation = p.allocations[idx] || 0;
+          if (!inst) {
+            return `null:${allocation}`;
+          }
+          if (inst.type === 'mutual_fund') {
+            return `mf:${inst.schemeCode}:${allocation}`;
+          } else if (inst.type === 'index_fund') {
+            // Replace spaces with underscores for cleaner URLs
+            const cleanIndexName = inst.indexName.replace(/\s+/g, '_');
+            return `idx:${cleanIndexName}:${allocation}`;
+          }
+          return `null:${allocation}`;
+        })
+        .join(',');
+      
+      return `${instrumentsStr}|${p.rebalancingEnabled ? '1' : '0'}|${p.rebalancingThreshold}`;
     })
     .join(';');
   

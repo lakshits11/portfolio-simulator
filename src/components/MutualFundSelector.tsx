@@ -25,6 +25,22 @@ export const MutualFundSelector: React.FC<MutualFundSelectorProps> = ({
   // Set initial value or default
   useEffect(() => {
     if (value && value.type === 'mutual_fund') {
+      // If we have a value but the name looks like a placeholder, find the real fund name
+      if (value.schemeName.startsWith('Scheme ')) {
+        const actualFund = funds.find(f => f.schemeCode === value.schemeCode);
+        if (actualFund) {
+          // Update the instrument with the correct name
+          const correctedInstrument: Instrument = {
+            ...value,
+            name: actualFund.schemeName,
+            schemeName: actualFund.schemeName
+          };
+          setSelectedName(actualFund.schemeName);
+          setQuery(actualFund.schemeName);
+          onSelect(correctedInstrument); // Update the parent with correct details
+          return;
+        }
+      }
       setSelectedName(value.schemeName);
       setQuery(value.schemeName);
     } else if (!value && defaultSchemeCode) {

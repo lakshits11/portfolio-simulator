@@ -17,9 +17,45 @@ export function usePortfolios(DEFAULT_SCHEME_CODE: number) {
           rebalancingEnabled: typeof p.rebalancingEnabled === 'boolean' ? p.rebalancingEnabled : false,
           rebalancingThreshold: typeof p.rebalancingThreshold === 'number' ? p.rebalancingThreshold : DEFAULT_REBALANCING_THRESHOLD,
         }))
-      : [{ selectedInstruments: [null], allocations: [100], rebalancingEnabled: false, rebalancingThreshold: DEFAULT_REBALANCING_THRESHOLD }]
+      : [
+          // Default Portfolio 1: NIFTY 50 Index (100%)
+          { 
+            selectedInstruments: [{
+              type: 'index_fund',
+              id: 'NIFTY 50',
+              name: 'NIFTY 50',
+              indexName: 'NIFTY 50',
+              displayName: 'NIFTY 50'
+            }], 
+            allocations: [100], 
+            rebalancingEnabled: false, 
+            rebalancingThreshold: DEFAULT_REBALANCING_THRESHOLD 
+          },
+          // Default Portfolio 2: Mixed (70% scheme 122639, 30% scheme 120197, rebalancing enabled)
+          { 
+            selectedInstruments: [
+              {
+                type: 'mutual_fund',
+                id: 122639,
+                name: 'Scheme 122639', // Will be updated by component
+                schemeCode: 122639,
+                schemeName: 'Scheme 122639'
+              },
+              {
+                type: 'mutual_fund',
+                id: 120197,
+                name: 'Scheme 120197', // Will be updated by component
+                schemeCode: 120197,
+                schemeName: 'Scheme 120197'
+              }
+            ], 
+            allocations: [70, 30], 
+            rebalancingEnabled: true, 
+            rebalancingThreshold: DEFAULT_REBALANCING_THRESHOLD 
+          }
+        ]
   );
-  const [years, setYears] = React.useState<number>(initialParams.years || 1);
+  const [years, setYears] = React.useState<number>(initialParams.years || 5);
 
   // Handler to add a new portfolio
   const handleAddPortfolio = () => {
