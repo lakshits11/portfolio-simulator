@@ -30,7 +30,7 @@ interface TransactionModalProps {
   portfolioName: string;
 }
 
-const TransactionModal: React.FC<TransactionModalProps & { funds: any[] }> = ({ visible, onClose, transactions, date, xirr, portfolioName, funds }) => {
+const TransactionModal: React.FC<TransactionModalProps & { funds: Array<{ schemeName: string; type: 'mutual_fund' | 'index_fund' }> }> = ({ visible, onClose, transactions, date, xirr, portfolioName, funds }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -472,7 +472,7 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
     date: string;
     xirr: number;
     portfolioName: string;
-    portfolioFunds: mfapiMutualFund[];
+    portfolioFunds: Array<{ schemeName: string; type: 'mutual_fund' | 'index_fund' }>;
   }>({ visible: false, transactions: [], date: '', xirr: 0, portfolioName: '', portfolioFunds: [] });
 
   const getFundName = (schemeCode: number) => {
@@ -546,15 +546,31 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
   const getSipCategories = () => getAllDates();
 
   // Helper to get the funds for a portfolio by name (e.g., 'Portfolio 1')
-  const getPortfolioFunds = (portfolioName: string): mfapiMutualFund[] => {
+  const getPortfolioFunds = (portfolioName: string): Array<{ schemeName: string; type: 'mutual_fund' | 'index_fund' }> => {
     const idx = parseInt(portfolioName.replace('Portfolio ', '')) - 1;
     const portfolio = portfolios[idx];
     if (!portfolio || !portfolio.selectedInstruments) return [];
     
     return portfolio.selectedInstruments
-      .filter(inst => inst && inst.type === 'mutual_fund')
-      .map(inst => funds.find(f => f.schemeCode === inst!.schemeCode))
-      .filter(Boolean) as mfapiMutualFund[];
+      .filter(inst => inst) // Filter out null instruments
+      .map(inst => {
+        if (inst!.type === 'mutual_fund') {
+          const fund = funds.find(f => f.schemeCode === inst!.schemeCode);
+          return {
+            schemeName: fund ? fund.schemeName : `Fund ${inst!.schemeCode}`,
+            type: 'mutual_fund' as const
+          };
+        } else if (inst!.type === 'index_fund') {
+          return {
+            schemeName: inst!.displayName || inst!.name,
+            type: 'index_fund' as const
+          };
+        }
+        return {
+          schemeName: `Unknown Instrument`,
+          type: 'mutual_fund' as const
+        };
+      });
   };
 
   return (
