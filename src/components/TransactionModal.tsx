@@ -116,30 +116,30 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ visible, onC
         </div>
         
         <div style={{ overflowX: 'auto' }}>
-          <table style={{ minWidth: '900px', borderCollapse: 'collapse', width: '100%' }}>
+          <table>
             <thead>
-              <tr style={{ background: '#f5f5f5' }}>
-                <th style={{ padding: '0.375rem 0.5rem', textAlign: 'left', border: '1px solid #ccc' }}>Fund</th>
-                <th style={{ padding: '0.375rem 0.5rem', textAlign: 'left', border: '1px solid #ccc' }}>Type</th>
-                <th style={{ padding: '0.375rem 0.5rem', textAlign: 'left', border: '1px solid #ccc' }}>Date</th>
-                <th style={{ padding: '0.375rem 0.5rem', textAlign: 'left', border: '1px solid #ccc' }}>NAV</th>
-                <th style={{ padding: '0.375rem 0.5rem', textAlign: 'left', border: '1px solid #ccc' }}>Units</th>
-                <th style={{ padding: '0.375rem 0.5rem', textAlign: 'left', border: '1px solid #ccc' }}>Amount</th>
-                <th style={{ padding: '0.375rem 0.5rem', textAlign: 'left', border: '1px solid #ccc' }}>Allocation %</th>
+              <tr>
+                <th>Fund</th>
+                <th>Type</th>
+                <th>Date</th>
+                <th>NAV</th>
+                <th>Units</th>
+                <th>Amount</th>
+                <th>Allocation %</th>
               </tr>
             </thead>
             <tbody>
               {sortedTxs.map((tx, idx) => {
                 const fundName = funds[tx.fundIdx]?.schemeName || `Fund ${tx.fundIdx + 1}`;
                 return (
-                  <tr key={idx} style={{ background: idx % 2 === 0 ? '#fff' : '#f9f9f9' }}>
-                    <td style={{ padding: '0.375rem 0.5rem', border: '1px solid #ccc' }}>{fundName}</td>
-                    <td style={{ padding: '0.375rem 0.5rem', border: '1px solid #ccc' }}>{transactionTypeDisplay[tx.type] || ''}</td>
-                    <td style={{ padding: '0.375rem 0.5rem', border: '1px solid #ccc' }}>{formatDate(tx.when)}</td>
-                    <td style={{ padding: '0.375rem 0.5rem', border: '1px solid #ccc' }}>{tx.nav.toFixed(2)}</td>
-                    <td style={{ padding: '0.375rem 0.5rem', border: '1px solid #ccc' }}>{tx.units.toFixed(4)}</td>
-                    <td style={{ padding: '0.375rem 0.5rem', border: '1px solid #ccc' }}>{tx.amount.toFixed(2)}</td>
-                    <td style={{ padding: '0.375rem 0.5rem', border: '1px solid #ccc' }}>
+                  <tr key={idx}>
+                    <td>{fundName}</td>
+                    <td>{transactionTypeDisplay[tx.type] || ''}</td>
+                    <td>{formatDate(tx.when)}</td>
+                    <td>{tx.nav.toFixed(2)}</td>
+                    <td>{tx.units.toFixed(4)}</td>
+                    <td>{tx.amount.toFixed(2)}</td>
+                    <td>
                       {((tx.type as string) === 'buy' || (tx.type as string) === 'rebalance') && tx.allocationPercentage !== undefined ? `${tx.allocationPercentage.toFixed(2)}%` : ''}
                     </td>
                   </tr>
