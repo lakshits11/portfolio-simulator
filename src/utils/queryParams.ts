@@ -99,6 +99,8 @@ export function setQueryParams(portfolios: Portfolio[], years: number) {
             // Replace spaces with underscores for cleaner URLs
             const cleanIndexName = inst.indexName.replace(/\s+/g, '_');
             return `idx:${cleanIndexName}:${allocation}`;
+          } else if (inst.type === 'yahoo_finance') {
+            return `yahoo:${inst.symbol}:${allocation}`;
           }
           return `null:${allocation}`;
         })
