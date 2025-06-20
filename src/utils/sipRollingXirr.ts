@@ -82,16 +82,22 @@ function computeSipXirrForDate(
   // Sort cashflows by date, as xirr might require it (though not explicitly stated, it's good practice)
   cashflowsForXirr.sort((a, b) => a.when.getTime() - b.when.getTime());
 
-  // The xirr library is expected to throw errors for invalid conditions
-  // (e.g., < 2 cashflows, all same sign, non-convergence).
-  // These errors will propagate up.
-  const calculatedXirrValue = xirr(cashflowsForXirr);
 
-  return [{
-    date: currentDate,
-    xirr: calculatedXirrValue,
-    transactions: allTransactions // Return original, non-aggregated transactions for display
-  }];
+  try {
+    // The xirr library is expected to throw errors for invalid conditions
+    // (e.g., < 2 cashflows, all same sign, non-convergence).
+    const calculatedXirrValue = xirr(cashflowsForXirr);
+
+    return [{
+      date: currentDate,
+      xirr: calculatedXirrValue,
+      transactions: allTransactions // Return original, non-aggregated transactions for display
+    }];
+  } catch (error) {
+    console.warn(`XIRR calculation failed for date ${currentDate.toISOString()}:`, error);
+    // Return empty array instead of throwing, so other dates can still be calculated
+    return [];
+  }
 }
 
 function calculateTransactionsForDate(
