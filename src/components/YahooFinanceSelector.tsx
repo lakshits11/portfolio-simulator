@@ -11,9 +11,9 @@ interface YahooFinanceSelectorProps {
   value?: Instrument;
 }
 
-export const YahooFinanceSelector: React.FC<YahooFinanceSelectorProps> = ({ 
-  onSelect, 
-  value 
+export const YahooFinanceSelector: React.FC<YahooFinanceSelectorProps> = ({
+  onSelect,
+  value
 }) => {
   const [symbol, setSymbol] = useState('');
 
@@ -29,7 +29,7 @@ export const YahooFinanceSelector: React.FC<YahooFinanceSelectorProps> = ({
   const handleSymbolChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const newSymbol = e.target.value.toUpperCase();
     setSymbol(newSymbol);
-    
+
     if (newSymbol.trim()) {
       const instrument: Instrument = {
         type: 'yahoo_finance',
@@ -72,11 +72,18 @@ export const YahooFinanceSelector: React.FC<YahooFinanceSelectorProps> = ({
               content={
                 <Block padding="scale300">
                   <LabelSmall>
-                    Examples:<br/>
-                    • TCS.NS (Indian stocks)<br/>
-                    • AAPL (US stocks)<br/>
-                    • ^GSPC (S&P 500 index)<br/>
-                    • BTC-USD (Cryptocurrency)
+                    Examples:<br />
+                    • TCS.NS (Indian stock - NSE)<br />
+                    • RELIANCE.BO (Indian stock - BSE)<br />
+                    • AAPL (US stock - Apple Inc.)<br />
+                    • TSLA (US stock - Tesla)<br />
+                    • ^GSPC (S&P 500 index - S&P 500)<br />
+                    • ^NSEI (Index - NIFTY 50)<br />
+                    • USDINR=X (Currency - USD to INR)<br />
+                    • EURUSD=X (Currency - Euro to USD)<br />
+                    • BTC-USD (Crypto - Bitcoin in INR)<br />
+                    • GC=F (Commodity - Gold Futures in USD)<br />
+                    • MCX:GOLD1! (Commodity - Gold in INR on MCX)<br />
                   </LabelSmall>
                 </Block>
               }
