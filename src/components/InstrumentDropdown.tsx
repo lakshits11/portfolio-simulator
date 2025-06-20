@@ -7,7 +7,7 @@ import { YahooFinanceSelector } from './YahooFinanceSelector';
 interface InstrumentDropdownProps {
   instrumentType: InstrumentType;
   funds: { schemeCode: number; schemeName: string }[];
-  onSelect: (instrument: Instrument) => void;
+  onSelect: (instrument: Instrument | null) => void;
   value?: Instrument;
   defaultSchemeCode?: number;
 }
