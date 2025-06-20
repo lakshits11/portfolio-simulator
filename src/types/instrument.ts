@@ -1,4 +1,4 @@
-export type InstrumentType = 'mutual_fund' | 'index_fund';
+export type InstrumentType = 'mutual_fund' | 'index_fund' | 'yahoo_finance';
 
 export interface BaseInstrument {
   id: string | number;
@@ -20,7 +20,14 @@ export interface IndexFund extends BaseInstrument {
   displayName: string;
 }
 
-export type Instrument = MutualFund | IndexFund;
+export interface YahooFinanceInstrument extends BaseInstrument {
+  type: 'yahoo_finance';
+  id: string;
+  symbol: string;
+  displayName: string;
+}
+
+export type Instrument = MutualFund | IndexFund | YahooFinanceInstrument;
 
 export interface InstrumentNavData {
   date: Date;

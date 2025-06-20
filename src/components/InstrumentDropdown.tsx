@@ -2,6 +2,7 @@ import React from 'react';
 import { InstrumentType, Instrument } from '../types/instrument';
 import { MutualFundSelector } from './MutualFundSelector';
 import { IndexSelector } from './IndexSelector';
+import { YahooFinanceSelector } from './YahooFinanceSelector';
 
 interface InstrumentDropdownProps {
   instrumentType: InstrumentType;
@@ -32,6 +33,15 @@ export const InstrumentDropdown: React.FC<InstrumentDropdownProps> = ({
   if (instrumentType === 'index_fund') {
     return (
       <IndexSelector
+        onSelect={onSelect}
+        value={value}
+      />
+    );
+  }
+
+  if (instrumentType === 'yahoo_finance') {
+    return (
+      <YahooFinanceSelector
         onSelect={onSelect}
         value={value}
       />

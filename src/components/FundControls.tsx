@@ -75,8 +75,11 @@ export const FundControls: React.FC<FundControlsProps> = ({
         };
         onInstrumentSelect(idx, defaultInstrument);
       }
-    } else {
+    } else if (type === 'index_fund') {
       // For index funds, clear the selection (user needs to select manually)
+      onInstrumentSelect(idx, null);
+    } else if (type === 'yahoo_finance') {
+      // For Yahoo Finance, clear the selection (user needs to enter symbol manually)
       onInstrumentSelect(idx, null);
     }
   };

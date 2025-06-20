@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { fillMissingNavDates } from '../utils/fillMissingNavDates';
 import { indexService } from '../services/indexService';
+import { yahooFinanceService } from '../services/yahooFinanceService';
 
 export function usePortfolioPlot({
   portfolios,
@@ -49,6 +50,24 @@ export function usePortfolioPlot({
                   identifier = `${pIdx}_${instrument.indexName}`;
                 } catch (indexError) {
                   console.error(`Failed to fetch index data for ${instrument.indexName}:`, indexError);
+                  continue;
+                }
+              } else if (instrument.type === 'yahoo_finance') {
+                try {
+                  const stockData = await yahooFinanceService.fetchStockData(instrument.symbol);
+                  
+                  if (!stockData || stockData.length === 0) {
+                    continue;
+                  }
+                  
+                  // Convert stock data to NAV format (keep Date objects for fillMissingNavDates)
+                  nav = stockData.map(item => ({
+                    date: item.date, // Keep as Date object
+                    nav: item.nav
+                  }));
+                  identifier = `${pIdx}_${instrument.symbol}`;
+                } catch (stockError) {
+                  console.error(`Failed to fetch stock data for ${instrument.symbol}:`, stockError);
                   continue;
                 }
               }

@@ -50,6 +50,15 @@ export function getQueryParams() {
                     indexName: indexName,
                     displayName: indexName
                   });
+                } else if (type === 'yahoo' && instrumentParts.length >= 3) {
+                  const symbol = instrumentParts[1];
+                  selectedInstruments.push({
+                    type: 'yahoo_finance',
+                    id: symbol,
+                    name: symbol,
+                    symbol: symbol,
+                    displayName: symbol
+                  });
                 } else {
                   selectedInstruments.push(null);
                 }

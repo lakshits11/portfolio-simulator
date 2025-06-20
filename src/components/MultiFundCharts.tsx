@@ -37,7 +37,7 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
     date: string;
     xirr: number;
     portfolioName: string;
-    portfolioFunds: Array<{ schemeName: string; type: 'mutual_fund' | 'index_fund' }>;
+    portfolioFunds: Array<{ schemeName: string; type: 'mutual_fund' | 'index_fund' | 'yahoo_finance' }>;
   }>({ visible: false, transactions: [], date: '', xirr: 0, portfolioName: '', portfolioFunds: [] });
 
   const getFundName = (schemeCode: number) => {
@@ -111,7 +111,7 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
   const getSipCategories = () => getAllDates();
 
   // Helper to get the funds for a portfolio by name (e.g., 'Portfolio 1')
-  const getPortfolioFunds = (portfolioName: string): Array<{ schemeName: string; type: 'mutual_fund' | 'index_fund' }> => {
+  const getPortfolioFunds = (portfolioName: string): Array<{ schemeName: string; type: 'mutual_fund' | 'index_fund' | 'yahoo_finance' }> => {
     const idx = parseInt(portfolioName.replace('Portfolio ', '')) - 1;
     const portfolio = portfolios[idx];
     if (!portfolio || !portfolio.selectedInstruments) return [];
@@ -129,6 +129,11 @@ export const MultiFundCharts: React.FC<MultiFundChartsProps> = ({
           return {
             schemeName: inst!.displayName || inst!.name,
             type: 'index_fund' as const
+          };
+        } else if (inst!.type === 'yahoo_finance') {
+          return {
+            schemeName: inst!.displayName || inst!.symbol,
+            type: 'yahoo_finance' as const
           };
         }
         return {
