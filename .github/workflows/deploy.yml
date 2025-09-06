@@ -1,0 +1,35 @@
+# Name of the workflow
+name: Deploy to GitHub Pages
+
+# Run on pushes to the "main" branch
+on:
+  push:
+    branches: [ "main" ]
+
+# A workflow run is made up of one or more jobs
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Setup Node.js and caching
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # 4. Build and Deploy
+      # Your "deploy" script already runs "npm run build", so we just need to run one command.
+      - name: Build and Deploy to GitHub Pages
+        run: |
+          git config --global user.name '${{ github.actor }}'
+          git config --global user.email '${{ github.actor }}@users.noreply.github.com'
+          npm run deploy
