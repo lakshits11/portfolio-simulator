@@ -11,7 +11,7 @@ class IndexService {
 
     try {
       const response = await fetch(
-        `https://raw.githubusercontent.com/asrajavel/mf-index-data/main/index%20data/${indexName}.json`
+        `https://raw.githubusercontent.com/lakshits11/mf-index-data/main/index%20data/${indexName}.json`
       );
       
       if (!response.ok) {
@@ -48,7 +48,7 @@ class IndexService {
 
     try {
       const response = await fetch(
-        'https://raw.githubusercontent.com/asrajavel/mf-index-data/main/index%20list.json'
+        'https://raw.githubusercontent.com/lakshits11/mf-index-data/main/index%20list.json'
       );
       
       if (!response.ok) {

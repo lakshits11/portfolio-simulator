@@ -35,7 +35,7 @@ This project is configured for GitHub Pages deployment.
 
 ### Live Demo
 
-[View Live Application](https://asrajavel.github.io/portfolio-simulator/) 
+[View Live Application](https://lakshits11.github.io/portfolio-simulator/) 
 
 ## Features
 
