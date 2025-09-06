@@ -6,7 +6,10 @@ on:
   push:
     branches: [ "main" ]
 
-# A workflow run is made up of one or more jobs
+# Grant the GITHUB_TOKEN permissions to write to the repository
+permissions:
+  contents: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -27,9 +30,14 @@ jobs:
         run: npm ci
 
       # 4. Build and Deploy
-      # Your "deploy" script already runs "npm run build", so we just need to run one command.
       - name: Build and Deploy to GitHub Pages
+        env:
+          # This is the token that allows gh-pages to push to the repository
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Configure git with the username and email of the user who triggered the workflow
           git config --global user.name '${{ github.actor }}'
           git config --global user.email '${{ github.actor }}@users.noreply.github.com'
+          
+          # Run the deploy script from package.json
           npm run deploy
