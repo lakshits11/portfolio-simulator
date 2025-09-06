@@ -1,43 +1,61 @@
-# Name of the workflow
 name: Deploy to GitHub Pages
 
-# Run on pushes to the "main" branch
 on:
   push:
     branches: [ "main" ]
+  workflow_dispatch:
 
-# Grant the GITHUB_TOKEN permissions to write to the repository
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
-      # 1. Checkout the repository
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      # 2. Setup Node.js and caching
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
 
-      # 3. Install dependencies
-      - name: Install dependencies
-        run: npm ci
-
-      # 4. Build and Deploy
-      - name: Build and Deploy to GitHub Pages
-        env:
-          # This is the token that allows gh-pages to push to the repository
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Ensure public registry to avoid npm auth prompts
+      - name: Use public npm registry
         run: |
-          # Configure git with the username and email of the user who triggered the workflow
-          git config --global user.name '${{ github.actor }}'
-          git config --global user.email '${{ github.actor }}@users.noreply.github.com'
-          
-          # Run the deploy script from package.json
-          npm run deploy
+          echo "registry=https://registry.npmjs.org/" > .npmrc
+          echo "always-auth=false" >> .npmrc
+
+      - name: Install deps
+        run: npm ci --no-audit --fund=false
+
+      - name: Build
+        run: npm run build
+
+      # SPA fallback for client-side routing
+      - name: SPA fallback
+        run: cp dist/index.html dist/404.html
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
